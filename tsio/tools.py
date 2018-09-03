@@ -1,5 +1,5 @@
 """
-Basic independent tools.
+Miscellaneous independent tools.
 """
 from datetime import datetime
 import numpy as np

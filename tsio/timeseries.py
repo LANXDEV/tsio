@@ -5,10 +5,10 @@ import copy
 from pprint import pformat
 import numpy as np
 import pandas as pd
+from tsio.constants import COMPONENTS
 from tsio.tools import at_index
 
-_COMPONENTS = 'COMPONENTS'
-_components = _COMPONENTS.lower()
+_components = COMPONENTS.lower()
 
 
 class TimeSeries:
@@ -18,9 +18,6 @@ class TimeSeries:
     ----------
     timeseries: str, :py:class:`TimeSeries`
         A name or a TimeSeries object.
-    by_ref : bool, optional
-        If True and ``time_series_arg`` is a TimeSeries instance, will return time_series_arg itself.
-        If False, will return a copy of time_series_arg with deep copies of all underlying attributes.
 
     Attributes
     ----------
@@ -63,7 +60,7 @@ class TimeSeries:
     | The library doesn't enforce any of the above naming conventions, except, of course,
     | the special treatment to the ``"COMPONENTS"`` attribute.
     """
-    def __init__(self, timeseries, *args, **kwargs):
+    def __init__(self, timeseries):
         if isinstance(timeseries, str):
             # initialize TimeSeries from a string.
             self.ts_name = timeseries
@@ -102,14 +99,14 @@ class TimeSeries:
             # Just create an empty ts_values then.
             self.ts_values = pd.Series()
             return self.ts_values
-        if attr == 'components':
+        if attr == _components:
             try:
-                return self.ts_attributes[_COMPONENTS]
+                return self.ts_attributes[COMPONENTS]
             except KeyError:
                 raise AttributeError("The TimeSeries {0} has no attribute '{1}'.".format(self.ts_name, attr))
         try:
             attr = attr.upper()
-            return self.ts_attributes[_COMPONENTS][attr]
+            return self.ts_attributes[COMPONENTS][attr]
         except KeyError:
             raise AttributeError("The TimeSeries {0} has no attribute '{1}'.".format(self.ts_name, attr))
 
@@ -219,7 +216,7 @@ class TimeSeries:
         attribute_name = attribute_name.upper()
         return self.ts_attributes.get(attribute_name, default)
 
-    def get_value(self, index, last_available=True, fill_value=np.nan):
+    def get_values(self, index, last_available=True, fill_value=np.nan):
         """
         Parameters
         ----------
