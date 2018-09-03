@@ -5,11 +5,14 @@ import copy
 from pprint import pformat
 import numpy as np
 import pandas as pd
-from tsio.conf.
+from tsio.tools import at_index
+
+_COMPONENTS = 'COMPONENTS'
+_components = _COMPONENTS.lower()
 
 
 class TimeSeries:
-    """The most basic data container and financial instrument.
+    """The most basic data container.
 
     Parameters
     ----------
@@ -73,11 +76,11 @@ class TimeSeries:
             self.ts_attributes = timeseries.ts_attributes
             self.ts_values = timeseries.ts_values
         else:
-            raise ValueError('Could not create instance of TimeSeries with args: '
+            raise ValueError('Could not create instance of TimeSeries with arguments: '
                              'time_series_arg={0}'.format(timeseries))
 
     def __eq__(self, other):
-        # TimeSeries are only compared through their names.
+        # TimeSeries are compared using their names.
         try:
             return self.ts_name == other.ts_name
         except AttributeError:
@@ -93,11 +96,6 @@ class TimeSeries:
         return self.quotes.ts_values
 
     def __getattr__(self, attr):
-        if attr == 'quotes':
-            try:
-                return self.quotes
-            except KeyError:
-                return self
         if attr == 'ts_values':
             # If a request for ts_values attribute finishes in __getattr__, it means that ts_values is not an
             # attribute of the TimeSeries (i.e. the TimeSeries was initialized from a string).
@@ -106,15 +104,14 @@ class TimeSeries:
             return self.ts_values
         if attr == 'components':
             try:
-                return self.ts_attributes[defs.COMPONENTS]
+                return self.ts_attributes[_COMPONENTS]
             except KeyError:
-                raise AttributeError("The {0} {1} has no attribute '{2}'.".format(type(self).__name__, self.ts_name,
-                                                                                  attr))
+                raise AttributeError("The TimeSeries {0} has no attribute '{1}'.".format(self.ts_name, attr))
         try:
             attr = attr.upper()
-            return self.ts_attributes[defs.COMPONENTS][attr]
+            return self.ts_attributes[_COMPONENTS][attr]
         except KeyError:
-            raise AttributeError("The {0} {1} has no attribute '{2}'.".format(type(self).__name__, self.ts_name, attr))
+            raise AttributeError("The TimeSeries {0} has no attribute '{1}'.".format(self.ts_name, attr))
 
     def __deepcopy__(self, memo):
         new_timeseries = TimeSeries(self.ts_name)
@@ -222,15 +219,15 @@ class TimeSeries:
         attribute_name = attribute_name.upper()
         return self.ts_attributes.get(attribute_name, default)
 
-    def get_value(self, date, last_available=True, default=np.nan, **kwargs):
+    def get_value(self, index, last_available=True, fill_value=np.nan):
         """
         Parameters
         ----------
-        date: date-like
+        index: date-like
             Requested date(s).
         last_available: bool
             Whether to use last available data if `date` is missing in the quotes time series.
-        default: scalar
+        fill_value: scalar
             Default value in case `date` can't be found.
 
         Returns
@@ -238,25 +235,4 @@ class TimeSeries:
         scalar
             Value corresponding to `date`.
         """
-        try:
-            date = to_datetime(date)
-        except:
-            pass
-        return find_previous(df=self.ts_values, date=date, last_available=last_available,
-                             default=default)
-
-    def get(self, arg):
-        try:
-            arg = str(arg).lower()
-        except:
-            return None
-        if arg in ['attr', 'attributes']:
-            return self.ts_attributes
-        elif arg in ['values']:
-            return self.ts_values
-        elif arg.upper() in self.ts_attributes:
-            return self.ts_attributes.get(arg.upper())
-        elif arg in self.__dict__:
-            return self.__dict__[arg]
-        else:
-            return None
+        return at_index(df=self.ts_values, index=index, last_available=last_available, fill_value=fill_value)

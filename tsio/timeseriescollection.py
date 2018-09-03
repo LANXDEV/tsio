@@ -1,14 +1,13 @@
 """
-A TimeSeriesCollection is is a custom MutableSet of objects possesing a 'ts_name' property that remembers its order,
-so that every entry has an index that can be looked up.
-Based on the recipe of OrderedSet originally posted to GitHub by Rob Speer, and released under the MIT license.
+A TimeSeriesCollection is is an 'Ordered Set' of objects with a 'ts_name' property.
+Based on the recipe of OrderedSet originally posted to GitHub by Rob Speer, and released under the MIT license
+(https://github.com/LuminosoInsight/ordered-set).
 """
 
 import collections
-from lanxad.base.timeseries import TimeSeries
+from tsio.timeseries import TimeSeries
 
 SLICE_ALL = slice(None)
-__version__ = '2.0.1'
 
 
 def is_iterable(obj):
