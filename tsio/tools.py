@@ -1,9 +1,19 @@
 """
 Miscellaneous independent tools.
 """
+import os
 from datetime import datetime
 import numpy as np
 import pandas as pd
+
+
+def create_folder(address):
+    while not os.path.exists(address):
+        # Making a path to store the result files if it does not exist already
+        try:
+            os.makedirs(address)
+        except:
+            print('create_folder: is trying to create folders ({}), but not successful.. Retrying.'.format(address))
 
 
 def is_iterable(obj):

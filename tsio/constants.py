@@ -5,7 +5,6 @@ TODO: Implement a good way to override these constants.
 COMPONENTS = "COMPONENTS"  # The key used to access the 'Components' dict of a TimeSeries object.
 TS_NAME = 'TS_NAME'  # Attribute (in a MongoDB document) representing the ts_name if a TimeSeries.
 TS_VALUES = 'VALUE'  # Attribute (in a MongoDB document) representing the ts_values of the TimeSeries.
-IDENTIFIER = 'IDENTIFIER'
 TYPE = 'TYPE'
 LAST_USE = 'LAST_USE'  # Attribute for the last use date of a TimeSeries.
 LAST_ATTRIBUTE_UPDATE = 'LAST_ATTRIBUTE_UPDATE'  # Attribute containing the last ts_attributes update datetime.

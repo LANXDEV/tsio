@@ -127,7 +127,7 @@ class TimeSeries:
                + str(pformat(self.ts_attributes)) + 2*'\n' \
                + '-'*20 + '\n' \
                + 'ts_values:' + 2*'\n' \
-               + self.ts_values.to_string() + 2*'\n' \
+               + str(self.ts_values) + 2*'\n' \
                + '-' * 20 + '\n' \
                + '=' * 20 + '\n'
 

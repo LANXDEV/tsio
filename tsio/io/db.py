@@ -97,7 +97,7 @@ class DBIO:
         self.collection_name = collection_name
         self.db = pymongo.MongoClient(self.host_address)[self.db_name][self.collection_name]
 
-    def read_attributes(self, ts, components=True, depth=np.inf, attributes=None):
+    def read_attributes(self, ts_collection, components=True, depth=np.inf, attributes=None):
         if isinstance(components, list):
             components = [key.upper() for key in components]
         if attributes and attributes is not True:
@@ -112,7 +112,7 @@ class DBIO:
         else:
             attr_specs = {TS_VALUES: 0}
 
-        temp_ts_collection = convert_to_ts_collection(ts)
+        temp_ts_collection = convert_to_ts_collection(ts_collection)
         counter = 0
         all_names_list = list()
 
@@ -138,11 +138,11 @@ class DBIO:
         self.db.update_many({TS_NAME: {"$in": all_names_list}},
                             {'$set': {LAST_USE: datetime.datetime.utcnow()}})
 
-    def read_values(self, arg, components=True, depth=np.inf):
+    def read_values(self, ts_collection, components=True, depth=np.inf):
         if isinstance(components, list):
             components = [key.upper() for key in components]
 
-        temp_ts_collection = convert_to_ts_collection(arg)
+        temp_ts_collection = convert_to_ts_collection(ts_collection)
         counter = 0
         all_names_list = list()
 
@@ -165,11 +165,11 @@ class DBIO:
                         if counter < depth:
                             instantiate_components(ts, components, temp_ts_collection)
 
-    def read(self, ts, components=True, depth=np.inf):
+    def read(self, ts_collection, components=True, depth=np.inf):
         if isinstance(components, list):
             components = [key.upper() for key in components]
 
-        temp_ts_collection = convert_to_ts_collection(ts)
+        temp_ts_collection = convert_to_ts_collection(ts_collection)
         counter = 0
         all_names_list = list()
         while counter < depth:
@@ -200,10 +200,10 @@ class DBIO:
         self.db.update_many({TS_NAME: {"$in": all_names_list}},
                             {'$set': {LAST_USE: datetime.datetime.utcnow()}})
 
-    def write_attributes(self, arg, components=True, depth=np.inf):
+    def write_attributes(self, ts_collection, components=True, depth=np.inf):
         if isinstance(components, list):
             components = [key.upper() for key in components]
-        temp_ts_collection = convert_to_ts_collection(arg)
+        temp_ts_collection = convert_to_ts_collection(ts_collection)
         counter = 0
         full_ts_collection = TimeSeriesCollection()
         while counter < depth:
@@ -245,11 +245,11 @@ class DBIO:
                 input(werrors)
                 raise
 
-    def write(self, arg, components=True, depth=np.inf):
+    def write(self, ts_collection, components=True, depth=np.inf):
         if isinstance(components, list):
             components = [key.upper() for key in components]
 
-        temp_ts_collection = convert_to_ts_collection(arg)
+        temp_ts_collection = convert_to_ts_collection(ts_collection)
         to_updating_collection_names = temp_ts_collection.ts_names()[:]
 
         if len(to_updating_collection_names) >= 1000:
@@ -295,10 +295,10 @@ class DBIO:
                 warnings.warn(bwe.details)
                 raise bwe
 
-    def remove(self, ts, components=False, depth=np.inf, confirm=True):
+    def remove(self, ts_collection, components=False, depth=np.inf, confirm=True):
         if isinstance(components, list):
             components = [key.upper() for key in components]
-        ts_collection = convert_to_ts_collection(ts)
+        ts_collection = convert_to_ts_collection(ts_collection)
         counter = 0
         full_ts_collection = TimeSeriesCollection()
         while counter < depth:
