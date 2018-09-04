@@ -6,6 +6,62 @@ import numpy as np
 import pandas as pd
 
 
+def is_iterable(obj):
+    """
+    Are we being asked to look up a list of things, instead of a single thing?
+    We check for the `__iter__` attribute so that this can cover types that
+    don't have to be known by this module, such as NumPy arrays.
+    Strings, however, should be considered as atomic values to look up, not
+    iterables. The same goes for tuples, since they are immutable and therefore
+    valid entries.
+    We don't need to check for the Python 2 `unicode` type, because it doesn't
+    have an `__iter__` attribute anyway.
+    """
+    return hasattr(obj, '__iter__') and not isinstance(obj, str) and not isinstance(obj, tuple)
+
+
+def isnull(arg):
+    """Check if argument is 'reasonably null'.
+
+    'reasonably null' includes: None, empty string, empty list, list with empty strings, np.nan, pd.NaT, etc.
+
+    Parameters
+    ----------
+    arg
+
+    Returns
+    -------
+    bool
+
+    """
+    if isinstance(arg, pd.DataFrame) or isinstance(arg, pd.Series):
+        return arg.empty
+    null_list = [False, None, [None], '', []]
+    null_list += [i * ' ' for i in range(0, 30)]
+    try:
+        if arg in null_list:
+            return True
+    except:
+        pass
+    try:
+        result = pd.isnull(arg)
+        if is_iterable(result):
+            return result.all()
+        else:
+            return result
+    except:
+        pass
+    try:
+        result = np.isnan(arg)
+        if is_iterable(result):
+            return result.all()
+        else:
+            return result
+    except:
+        pass
+    return False
+
+
 def isvectorizable(obj):
     """Check if object is numpy.vectorize-vectorizable.
 

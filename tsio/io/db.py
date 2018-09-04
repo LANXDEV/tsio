@@ -95,7 +95,7 @@ class DBIO:
         self.host_address = host_address
         self.db_name = db_name
         self.collection_name = collection_name
-        self.db = pymongo.MongoClient(self.host_address)[self.db_name][collection_name]
+        self.db = pymongo.MongoClient(self.host_address)[self.db_name][self.collection_name]
 
     def read_attributes(self, ts, components=True, depth=np.inf, attributes=None):
         if isinstance(components, list):
