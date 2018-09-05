@@ -81,9 +81,9 @@ class GenIO(DBIO):
     Each external reading class should have methods with the below signatures:
 
     * ``bool is_member(ts)``: Check whether a time series should be read with this class.
-    * ``read_attributes(ts, attributes)``: Read from source the attributes of a time series collection.
-    * ``read_values(ts)``: Read from source the values of a time series collection.
-    * ``read(ts)``: Read from source the attributes and values of a time series collection.
+    * ``read_attributes(ts_collection, attributes)``: Read from source the attributes of a time series collection.
+    * ``read_values(ts_collection)``: Read from source the values of a time series collection.
+    * ``read(ts_collection)``: Read from source the attributes and values of a time series collection.
 
     Parameters
     ----------
@@ -105,8 +105,24 @@ class GenIO(DBIO):
             self.external_interfaces = external_interfaces
         self.interfaces_map = {i: interface for i, interface in enumerate(self.external_interfaces)}
 
-    def read_attributes(self, ts, components=True, depth=np.inf, attributes=None, use_external=True, **kwargs):
-        ts = convert_to_ts_collection(ts)
+    def read_attributes(self, ts_collection, components=True, depth=np.inf, attributes=None, use_external=True,
+                        **kwargs):
+        """ Read time series attributes from the database.
+
+        Parameters
+        ----------
+        ts_collection: type convertible to :py:class:`TimeSeriesCollection`
+            Time series to be read.
+        components: list(str), optional
+            Optional collection of component names to be read and instantiated. Default is all components.
+        depth: int, optional
+            Depth of component instantiation. ``depth = 1`` means no components are instantiated. Default is infinity.
+        attributes: list(str), optional
+            Optional collection of attribute names to be read. Default is all attributes.
+        use_external: bool, optional
+            Whether to use the external reading classes. Default is True.
+        """
+        ts = convert_to_ts_collection(ts_collection)
         super().read_attributes(ts_collection=ts, components=components, depth=depth, attributes=attributes)
         if use_external:
             flat_ts_list = flatten(ts)
@@ -115,8 +131,23 @@ class GenIO(DBIO):
                 self.interfaces_map[interface_code].read_attributes(ts_collection=ts_list, attributes=attributes,
                                                                     **kwargs)
 
-    def read_values(self, ts, components=True, depth=np.inf, use_external=True, **kwargs):
-        ts = convert_to_ts_collection(ts)
+    def read_values(self, ts_collection, components=True, depth=np.inf, use_external=True, **kwargs):
+        """ Read time series values from the database.
+
+        Parameters
+        ----------
+        ts_collection: type convertible to :py:class:`TimeSeriesCollection`
+            Time series to be read.
+        components: list(str), optional
+            Optional collection of component names to be read and instantiated. Default is all components.
+        depth: int, optional
+            Depth of component instantiation. ``depth = 1`` means no components are instantiated. Default is infinity.
+        use_external: bool, optional
+            Whether to use the external reading classes. Default is True.
+        kwargs: dict
+            Additional parameters to be passed to the external reading classes methods.
+        """
+        ts = convert_to_ts_collection(ts_collection)
         super().read(ts_collection=ts, components=components, depth=depth)
         if use_external:
             flat_ts_list = flatten(ts)
@@ -124,8 +155,23 @@ class GenIO(DBIO):
             for interface_code, ts_list in source_map.items():
                 self.interfaces_map[interface_code].read_values(ts_collection=ts_list, **kwargs)
 
-    def read(self, ts, components=True, depth=np.inf, use_external=True, **kwargs):
-        ts = convert_to_ts_collection(ts)
+    def read(self, ts_collection, components=True, depth=np.inf, use_external=True, **kwargs):
+        """ Read time series attributes and values from the database.
+
+        Parameters
+        ----------
+        ts_collection: type convertible to :py:class:`TimeSeriesCollection`
+            Time series to be read.
+        components: list(str), optional
+            Optional collection of component names to be read and instantiated. Default is all components.
+        depth: int, optional
+            Depth of component instantiation. ``depth = 1`` means no components are instantiated. Default is infinity.
+        use_external: bool, optional
+            Whether to use the external reading classes. Default is True.
+        kwargs: dict
+            Additional parameters to be passed to the external reading classes methods.
+        """
+        ts = convert_to_ts_collection(ts_collection)
         super().read(ts_collection=ts, components=components, depth=depth)
         if use_external:
             flat_ts_list = flatten(ts)

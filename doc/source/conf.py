@@ -16,14 +16,14 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'Time Series I/O'
-copyright = '2018, Lanx Capital, Vinícius Calasans'
-author = 'Lanx Capital, Vinícius Calasans'
+project = 'tsio'
+copyright = '2018, Lanx Capital & Vinícius Calasans'
+author = 'Lanx Capital & Vinícius Calasans'
 
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = '0.1.0'
+release = '0.0.1'
 
 
 # -- General configuration ---------------------------------------------------
