@@ -1,5 +1,5 @@
 """
-TimeSeries class, the basic data-holder of this library.
+TimeSeries class, a basic data-holder.
 """
 import copy
 from pprint import pformat
@@ -12,7 +12,7 @@ _components = COMPONENTS.lower()
 
 
 class TimeSeries:
-    """The most basic data container.
+    """Object representing a time series.
 
     Parameters
     ----------
@@ -22,26 +22,25 @@ class TimeSeries:
     Attributes
     ----------
     ts_name: str
-        The **unique** name of the ``TimeSeries``.
+        The name of the time series.
 
     ts_attributes: dict
         A dictionary of ``{str: attribute_value}``. ``attribute_value`` can be any object that is serializable by
         PyMongo's ``json_util`` tool.
 
     ts_values: pandas.Series
-        Series containing the (``datetime``, ``scalar``) pairs of the ``TimeSeries``.
+        Series containing the (``datetime``, ``scalar``) pairs of the time series.
 
     Note
     ----
     | **Names:**
-    | The ``ts_name`` attribute serves as the unique identifier for the ``TimeSeries`` in the
-    | database and in ``TimeSeries`` `containers` like ``TimeSeriesCollection``. It is therefore
-    | not a good idea to have different ``TimeSeries`` instances with the same name as
-    | this may lead to unexpected behavior.
+    | The ``ts_name`` attribute serves as the unique identifier for the time series in the
+    | database and in time series `containers` like :py:class:`TimeSeriesCollection`.
+    | Keeping different ``TimeSeries`` with the same name is not supported.
     |
     | `Suggested name patterns:`
-    | ``"(some_name)(field)"``: For ``TimeSeries`` that have a field.
-    | ``"some_name"``: For ``TimeSeries`` that have no fields and usually contain components.
+    | ``"(name)(field)"``: For time series that have a field (e.g. "Price", "Quote", "Rating").
+    | ``"name"``: For time series that have no fields.
     |
     | **Components:**
     | The attribute key ``"COMPONENTS"`` in ``ts_attributes`` is treated specially.
@@ -57,7 +56,7 @@ class TimeSeries:
     | For example, a callable bond needs at least a ``quote`` and ``call_schedule``
     | time series to be well defined.
     |
-    | The library doesn't enforce any of the above naming conventions, except, of course,
+    | The library doesn't enforce any of the above naming conventions, except
     | the special treatment to the ``"COMPONENTS"`` attribute.
     """
     def __init__(self, timeseries):
