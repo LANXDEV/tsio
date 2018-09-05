@@ -1,5 +1,5 @@
 """
-Miscellaneous independent tools.
+Miscellaneous tools.
 """
 import os
 from datetime import datetime

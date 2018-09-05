@@ -1,0 +1,435 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>tsio.io.db module &#8212; Time Series I/O 0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Time Series I/O</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=LANXDEV&repo=tsio&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../classes/TimeSeries.html">TimeSeries Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes/TimeSeriesCollection.html">TimeSeriesCollection Class</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-tsio.io.db">
+<span id="tsio-io-db-module"></span><h1>tsio.io.db module<a class="headerlink" href="#module-tsio.io.db" title="Permalink to this headline">¶</a></h1>
+<p>DBIO class for reading/writing TimeSeries from/in MongoDB collections.</p>
+<dl class="class">
+<dt id="tsio.io.db.DBIO">
+<em class="property">class </em><code class="descname">DBIO</code><span class="sig-paren">(</span><em>host_address</em>, <em>db_name</em>, <em>collection_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#DBIO"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.DBIO" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class for reading/writing time series in MongoDB.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host_address</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Address of the MongoDB daemon.</li>
+<li><strong>db_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – MongoDB database name.</li>
+<li><strong>collection_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – MongoDB collection.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="tsio.io.db.DBIO.attribute_names">
+<code class="descname">attribute_names</code><span class="sig-paren">(</span><em>ts_names=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#DBIO.attribute_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.DBIO.attribute_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return set of attribute names in the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ts_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em><em>, </em><em>optional</em>) – Optional list of time series names to be used for searching attributes. Default is None (use the entire
+database).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">All the attribute names in <cite>ts_names</cite> or in the database.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.io.db.DBIO.ensure_index">
+<code class="descname">ensure_index</code><span class="sig-paren">(</span><em>attributes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#DBIO.ensure_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.DBIO.ensure_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create database index for an attribute.</p>
+<p>Useful to improve performance of attribute matching with the <code class="docutils literal notranslate"><span class="pre">select</span></code> method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>attributes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em>) – Attribute names for index creation.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.io.db.DBIO.in_db">
+<code class="descname">in_db</code><span class="sig-paren">(</span><em>ts</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#DBIO.in_db"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.DBIO.in_db" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a time series is in the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ts</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code>) – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Whether there is a time series with the same name in the database.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.io.db.DBIO.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>ts_collection</em>, <em>components=True</em>, <em>depth=inf</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#DBIO.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.DBIO.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read time series attributes and values from the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ts_collection</strong> (type convertible to <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeriesCollection</span></code>) – Time series to be read.</li>
+<li><strong>components</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em><em>, </em><em>optional</em>) – Optional collection of component names to be read and instantiated. Default is all components.</li>
+<li><strong>depth</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>, </em><em>optional</em>) – Depth of component instantiation. <code class="docutils literal notranslate"><span class="pre">depth</span> <span class="pre">=</span> <span class="pre">1</span></code> means no components are instantiated. Default is infinity.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.io.db.DBIO.read_all_attribute_values">
+<code class="descname">read_all_attribute_values</code><span class="sig-paren">(</span><em>attributes=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#DBIO.read_all_attribute_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.DBIO.read_all_attribute_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return set of attribute values in the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>attributes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em><em>, </em><em>optional</em>) – Attribute names whose values are to be retrieved. Default is None (use all attribute names in the database).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">All the attribute values of <code class="docutils literal notranslate"><span class="pre">attributes</span></code> or of all the attribute names in the database.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.io.db.DBIO.read_attributes">
+<code class="descname">read_attributes</code><span class="sig-paren">(</span><em>ts_collection</em>, <em>components=True</em>, <em>depth=inf</em>, <em>attributes=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#DBIO.read_attributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.DBIO.read_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read time series attributes from the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ts_collection</strong> (type convertible to <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeriesCollection</span></code>) – Time series to be read.</li>
+<li><strong>components</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em><em>, </em><em>optional</em>) – Optional collection of component names to be read and instantiated. Default is all components.</li>
+<li><strong>depth</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>, </em><em>optional</em>) – Depth of component instantiation. <code class="docutils literal notranslate"><span class="pre">depth</span> <span class="pre">=</span> <span class="pre">1</span></code> means no components are instantiated. Default is infinity.</li>
+<li><strong>attributes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em><em>, </em><em>optional</em>) – Optional collection of attribute names to be read. Default is all attributes.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.io.db.DBIO.read_values">
+<code class="descname">read_values</code><span class="sig-paren">(</span><em>ts_collection</em>, <em>components=True</em>, <em>depth=inf</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#DBIO.read_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.DBIO.read_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read time series values from the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ts_collection</strong> (type convertible to <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeriesCollection</span></code>) – Time series to be read.</li>
+<li><strong>components</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em><em>, </em><em>optional</em>) – Optional collection of component names to be read and instantiated. Default is all components.</li>
+<li><strong>depth</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>, </em><em>optional</em>) – Depth of component instantiation. <code class="docutils literal notranslate"><span class="pre">depth</span> <span class="pre">=</span> <span class="pre">1</span></code> means no components are instantiated. Default is infinity.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.io.db.DBIO.remove">
+<code class="descname">remove</code><span class="sig-paren">(</span><em>ts_collection</em>, <em>components=False</em>, <em>depth=inf</em>, <em>confirm=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#DBIO.remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.DBIO.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove time series from the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ts_collection</strong> (type convertible to <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeriesCollection</span></code>) – Time series to be removed.</li>
+<li><strong>components</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em><em>, </em><em>optional</em>) – Optional collection of component names to be removed. Default is no components.</li>
+<li><strong>depth</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>, </em><em>optional</em>) – Depth of component removal. <code class="docutils literal notranslate"><span class="pre">depth</span> <span class="pre">=</span> <span class="pre">1</span></code> means no components are removed. Default is 1.</li>
+<li><strong>confirm</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a><em>, </em><em>optional</em>) – Confirm before removing. Default is True.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.io.db.DBIO.search">
+<code class="descname">search</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#DBIO.search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.DBIO.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is not yet implemented.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.io.db.DBIO.select">
+<code class="descname">select</code><span class="sig-paren">(</span><em>mode='AND'</em>, <em>available_dates=None</em>, <em>all_fields=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#DBIO.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.DBIO.select" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get time series names matching attribute specifications.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>mode</strong> (<em>{&quot;AND&quot;</em><em>, </em><em>&quot;OR&quot;}</em><em>, </em><em>optional</em>) – Whether to match attributes with “AND” or “OR”. Default is “AND”.</li>
+<li><strong>available_dates</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><em>date-like</em><em>)</em><em>, </em><em>optional</em>) – If not None, return only names of time series that have values at these dates. Default is None.</li>
+<li><strong>all_fields</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to return time series with the “FIELD” attribute. Default is False.</li>
+<li><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a><em>, </em><em>optional</em>) – Dictionary of <code class="docutils literal notranslate"><span class="pre">{attribute_name:</span> <span class="pre">attribute_value}</span></code> pairs to match.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Names of time series matching the passed specifications.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.io.db.DBIO.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>ts_collection</em>, <em>components=True</em>, <em>depth=inf</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#DBIO.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.DBIO.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write time series attributes and values to the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ts_collection</strong> (type convertible to <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeriesCollection</span></code>) – Time series to be written.</li>
+<li><strong>components</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em><em>, </em><em>optional</em>) – Optional collection of component names to be written. Default is all components.</li>
+<li><strong>depth</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>, </em><em>optional</em>) – Depth of component writing. <code class="docutils literal notranslate"><span class="pre">depth</span> <span class="pre">=</span> <span class="pre">1</span></code> means no components are written. Default is infinity.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.io.db.DBIO.write_attributes">
+<code class="descname">write_attributes</code><span class="sig-paren">(</span><em>ts_collection</em>, <em>components=True</em>, <em>depth=inf</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#DBIO.write_attributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.DBIO.write_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write time series attributes to the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ts_collection</strong> (type convertible to <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeriesCollection</span></code>) – Time series to be written.</li>
+<li><strong>components</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em><em>, </em><em>optional</em>) – Optional collection of component names to be written. Default is all components.</li>
+<li><strong>depth</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a><em>, </em><em>optional</em>) – Depth of component writing. <code class="docutils literal notranslate"><span class="pre">depth</span> <span class="pre">=</span> <span class="pre">1</span></code> means no components are written. Default is infinity.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="tsio.io.db.convert_to_ts_collection">
+<code class="descname">convert_to_ts_collection</code><span class="sig-paren">(</span><em>ts</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#convert_to_ts_collection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.convert_to_ts_collection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a time series list-like object into <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeriesCollection</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ts</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeriesCollection</span></code>, str, list (str, <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code>)) – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Object built with the passed time series list-like.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeriesCollection</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="tsio.io.db.instantiate_components">
+<code class="descname">instantiate_components</code><span class="sig-paren">(</span><em>ts</em>, <em>components</em>, <em>ts_collection</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#instantiate_components"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.instantiate_components" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert inplace the string values in the ‘Components’ dict of a time series into time series objects.</p>
+<p>Also stores these components in a given time series collection.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ts</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code>) – Time series.</li>
+<li><strong>components</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em>) – List of component names to instantiate (keys of the ‘Components’ dict).</li>
+<li><strong>ts_collection</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeriesCollection</span></code>) – A time series collection to store the instantiated components.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="tsio.io.db.ts_attributes_to_dict">
+<code class="descname">ts_attributes_to_dict</code><span class="sig-paren">(</span><em>ts</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#ts_attributes_to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.ts_attributes_to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code> <code class="docutils literal notranslate"><span class="pre">ts_attributes</span></code> element into a dict.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ts</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code>) – Time series.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dictionary ready to be written in MongoDB.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="tsio.io.db.ts_to_dict">
+<code class="descname">ts_to_dict</code><span class="sig-paren">(</span><em>ts</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#ts_to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.ts_to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code> to dict, for writing in the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ts</strong> (object convertible to <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeriesCollection</span></code>) – A time series.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dictionary ready to be written in MongoDB.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="tsio.io.db.ts_values_to_dict">
+<code class="descname">ts_values_to_dict</code><span class="sig-paren">(</span><em>ts</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/io/db.html#ts_values_to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.io.db.ts_values_to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code> <code class="docutils literal notranslate"><span class="pre">ts_values</span></code> element into a dict.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ts</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code>) – Time series.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dictionary ready to be written in MongoDB.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2018, Lanx Capital, Vinícius Calasans.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/tsio/tsio.io.db.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

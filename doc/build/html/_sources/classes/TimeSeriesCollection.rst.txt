@@ -1,0 +1,7 @@
+TimeSeriesCollection Class
+==========================
+.. currentmodule:: tsio.timeseriescollection
+.. autoclass:: TimeSeriesCollection
+   :members:
+
+

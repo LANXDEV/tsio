@@ -1,7 +1,26 @@
 """
 A TimeSeriesCollection is is an 'Ordered Set' of objects with a 'ts_name' property.
-Based on the recipe of OrderedSet originally posted to GitHub by Rob Speer, and released under the MIT license
-(https://github.com/LuminosoInsight/ordered-set).
+Based on recipe of an ordered set (https://github.com/LuminosoInsight/ordered-set).
+
+Copyright (c) 2018 Luminoso Technologies, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
 """
 
 import collections
@@ -25,10 +44,11 @@ def is_iterable(obj):
 
 
 class TimeSeriesCollection(collections.MutableSet):
+    """ Custom ``OrderedSet`` for ``TimeSeries`` objects.
+
+    This container remembers the order in which its members were added, so that every entry has a numeric index that
+    can be looked up.
     """
-       A TimeSeriesCollection is a custom MutableSet of TimeSeries (or any other object possessing a ts_name property)
-       that remembers its order, so that every entry has an index that can be looked up.
-       """
     def __init__(self, iterable=None):
         self.items = []
         self.map = {}
@@ -62,9 +82,6 @@ class TimeSeriesCollection(collections.MutableSet):
             raise TypeError("Don't know how to index a TimeSeriesCollection by %r" %
                             index)
 
-    def copy(self):
-        return TimeSeriesCollection(self)
-
     def __getstate__(self):
         if len(self) == 0:
             # The state can't be an empty list.
@@ -85,104 +102,6 @@ class TimeSeriesCollection(collections.MutableSet):
         except AttributeError:
             pass
         return key in self.map
-
-    def add(self, ts):
-        """
-        Add `key` as an item to this OrderedSet, then return its index.
-        If `key` is already in the OrderedSet, return the index it already
-        had.
-        """
-        # ts may be a string with a name or a any object with a .ts_name attribute
-        if is_iterable(ts):
-            return [self.add(i) for i in ts]
-        else:
-            try:
-                # If the argument can by whatever means retrieve a ts_name attribute, then just add it to the list
-                object_name = ts.ts_name
-                object_to_add = ts
-            except AttributeError:
-                # If the argument has no ts_name attribute, we generate a TimeSeries from it
-                object_name = ts
-                object_to_add = TimeSeries(ts)
-            if object_name not in self.map:
-                self.map[object_name] = len(self.items)
-                self.items.append(object_to_add)
-            return self.map[object_name]
-    append = add
-
-    def update(self, sequence):
-        """
-        Update the set with the given iterable sequence, then return the index
-        of the last element inserted.
-        """
-        item_index = None
-        try:
-            for item in sequence:
-                item_index = self.add(item)
-        except TypeError:
-            raise ValueError('Argument needs to be an iterable, got %s' % type(sequence))
-        return item_index
-
-    def index(self, key):
-        """
-        Get the index of a given entry, raising an IndexError if it's not
-        present.
-        `key` can be an iterable of entries that is not a string, in which case
-        this returns a list of indices.
-        """
-        if is_iterable(key):
-            return [self.index(subkey) for subkey in key]
-        try:
-            key = key.ts_name
-        except AttributeError:
-            pass
-        return self.map[key]
-
-    def pop(self, index=-1):
-        """
-        Remove and return the last element from the set.
-        Raises KeyError if the set is empty.
-
-        Parameters
-        ----------
-        index: int, optional
-            The index of the element to be popped. Defaults to -1.
-
-        """
-        if not self.items:
-            raise KeyError('Set is empty')
-
-        elem = self.items[-1]
-        del self.items[-1]
-        del self.map[elem.ts_name]
-        return elem
-
-    def discard(self, ts):
-        """
-        Remove an element.  Do not raise an exception if absent.
-        The MutableSet mixin uses this to implement the .remove() method, which
-        *does* raise an error when asked to remove a non-existent item.
-        """
-        try:
-            object_to_remove_name = ts.ts_name
-            object_to_remove = ts
-        except AttributeError:
-            object_to_remove_name = ts
-            object_to_remove = TimeSeries(ts)
-        if object_to_remove in self:
-            i = self.map[object_to_remove_name]
-            del self.items[i]
-            del self.map[object_to_remove_name]
-            for k, v in self.map.items():
-                if v >= i:
-                    self.map[k] = v - 1
-
-    def clear(self):
-        """
-        Remove all items from this OrderedSet.
-        """
-        del self.items[:]
-        self.map.clear()
 
     def __iter__(self):
         return iter(self.items)
@@ -213,38 +132,201 @@ class TimeSeriesCollection(collections.MutableSet):
             s += ts.ts_name + "\n"
         return s
 
-    def ts_names(self):
-        """Returns list of names of the TimeSeries in self.collection
+    def copy(self):
+        """
+        Returns
+        -------
+        TimeSeriesCollection
+            A copy of this object.
+        """
+        return TimeSeriesCollection(self)
+
+    def add(self, ts):
+        """ Add `ts` and return its index.
+
+        Parameters
+        ----------
+        ts: :py:class:`TimeSeries`
+            A TimeSeries to add.
 
         Returns
         -------
-        list(str)
+        int, None
+            Index of the added TimeSeries.
 
+        Note
+        ----
+        If a TimeSeries with the same ``ts_name`` is already in the container, the method does not modify the
+        TimeSeriesCollection and returns the index associated with the previously existing TimeSeries.
+        """
+        # ts may be a string with a name or a any object with a .ts_name attribute
+        if is_iterable(ts):
+            return [self.add(i) for i in ts]
+        else:
+            try:
+                # If the argument can by whatever means retrieve a ts_name attribute, then just add it to the list
+                object_name = ts.ts_name
+                object_to_add = ts
+            except AttributeError:
+                # If the argument has no ts_name attribute, we generate a TimeSeries from it
+                object_name = ts
+                object_to_add = TimeSeries(ts)
+            if object_name not in self.map:
+                self.map[object_name] = len(self.items)
+                self.items.append(object_to_add)
+            return self.map[object_name]
+    append = add
+
+    def add_list(self, iterable):
+        """ Add iterable of elements.
+
+        Parameters
+        ----------
+        iterable: list of str, :py:class:`TimeSeries`
+            Elements to add.
+        """
+        for ts in iterable:
+            self.add(ts)
+
+    def update(self, sequence):
+        """ Update `self` with the given iterable.
+
+        Parameters
+        ----------
+        sequence: iterable of :py:class:`TimeSeries`
+            Elements to add.
+
+        Returns
+        -------
+        int
+            Index of the last inserted element.
+        """
+        item_index = None
+        try:
+            for item in sequence:
+                item_index = self.add(item)
+        except TypeError:
+            raise ValueError('Argument needs to be an iterable, got %s' % type(sequence))
+        return item_index
+
+    def index(self, key):
+        """
+        Parameters
+        ----------
+        key: iterable of str or :py:obj:`TimeSeries`
+            Element to be looked for.
+
+        Returns
+        -------
+        int, list of int
+            Index(es) of the given entry(ies).
+        """
+        if is_iterable(key):
+            return [self.index(subkey) for subkey in key]
+        try:
+            key = key.ts_name
+        except AttributeError:
+            pass
+        return self.map[key]
+
+    def pop(self):
+        """Pops the last-added element.
+
+        Returns
+        -------
+        :py:class:`TimeSeries`
+            The popped TimeSeries.
+        """
+        if not self.items:
+            raise KeyError('Set is empty')
+
+        elem = self.items[-1]
+        del self.items[-1]
+        del self.map[elem.ts_name]
+        return elem
+
+    def discard(self, ts):
+        """ Discard an element.  Does not raise an exception if absent.
+
+        Parameters
+        ----------
+        ts: :py:class:`TimeSeries`, str
+            Element to be discarded.
+        """
+        try:
+            object_to_remove_name = ts.ts_name
+            object_to_remove = ts
+        except AttributeError:
+            object_to_remove_name = ts
+            object_to_remove = TimeSeries(ts)
+        if object_to_remove in self:
+            i = self.map[object_to_remove_name]
+            del self.items[i]
+            del self.map[object_to_remove_name]
+            for k, v in self.map.items():
+                if v >= i:
+                    self.map[k] = v - 1
+
+    def remove(self, ts):
+        return self.discard(ts)
+
+    def remove_list(self, iterable):
+        """ Discard an iterable of elements.
+
+        Parameters
+        ----------
+        iterable: iterable of str, :py:class:`TimeSeries`
+            Elements to be discarded.
+        """
+        for ts in iterable:
+            self.remove(ts)
+
+    def clear(self):
+        """ Remove all items.
+        """
+        del self.items[:]
+        self.map.clear()
+
+    def ts_names(self):
+        """
+        Returns
+        -------
+        list of str
+            Names of the contained TimeSeries.
         """
         # returns list with names of all timeseries in the collection
         return [ts.ts_name for ts in self.items]
 
     def ts_attributes(self):
-        """Returns list of ts_attributes of the TimeSeries in self.collection
-
+        """
          Returns
          -------
-         list(DataFrame)
-
+         list of dict
+            ``ts_attributes`` of the contained TimeSeries.
          """
         return [ts.ts_attributes for ts in self.items]
 
     def ts_values(self):
-        """Returns list of ts_values of the TimeSeries in self.collection
-
+        """
          Returns
          -------
-         list(DataFrame)
-
+         list of pandas.Series
+             List of ``ts_values`` of the contained TimeSeries.
          """
         return [ts.ts_values for ts in self.items]
 
     def get(self, name):
+        """
+        Parameters
+        ----------
+        name: str
+            Name of the element.
+
+        Returns
+        -------
+        :py:class:`TimeSeries`
+            Reference to an element in the container.
+        """
         #  return reference to element with given name
         try:
             return self.items[self.map[name]]
@@ -252,15 +334,15 @@ class TimeSeriesCollection(collections.MutableSet):
             raise KeyError("This TimeSeriesCollection doesn't have an element with this name!!!: {}".format(name))
 
     def get_attributes(self, field):
+        """
+        Parameters
+        ----------
+        field: str
+            The field whose values are to be retrieved.
+
+        Returns
+        -------
+        list of objects
+            attribute values of the contained TimeSeries.
+        """
         return [ts.get_attribute(field) for ts in self.items]
-
-    def remove(self, ts):
-        return self.discard(ts)
-
-    def add_list(self, iterable):
-        for ts in iterable:
-            self.add(ts)
-
-    def remove_list(self, iterable):
-        for ts in iterable:
-            self.remove(ts)

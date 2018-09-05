@@ -35,11 +35,11 @@ class TimeSeries:
     ----
     | **Names:**
     | The ``ts_name`` attribute serves as the unique identifier for the time series in the
-    | database and in time series `containers` like :py:class:`TimeSeriesCollection`.
+    | database and in time series `containers` (:py:class:`TimeSeriesCollection`).
     | Keeping different ``TimeSeries`` with the same name is not supported.
     |
     | `Suggested name patterns:`
-    | ``"(name)(field)"``: For time series that have a field (e.g. "Price", "Quote", "Rating").
+    | ``"(name)(field)"``: For time series that have a field (e.g. "price", "quote", "rating").
     | ``"name"``: For time series that have no fields.
     |
     | **Components:**
@@ -47,8 +47,8 @@ class TimeSeries:
     | The value of this attribute must be a dict of  ``{component_type: component}``,
     | where ``component_type`` is the type of the component (e.g.: ``"QUOTE"``,
     | ``"CALL_SCHEDULE"``, ``"DIVIDEND_SCHEDULE"``), and ``component`` is the name
-    | of a ``TimeSeries`` representing the component (e.g.: ``"(TS_NAME)(QUOTE)"``,
-    | ``"(TS_NAME)(CALL_SCHEDULE)"``, ``"(TS_NAME)(DIVIDEND_SCHEDULE)"``).
+    | of a ``TimeSeries`` (e.g.: ``"(TS_NAME)(QUOTE)"``, ``"(TS_NAME)(CALL_SCHEDULE)"``,
+    | ``"(TS_NAME)(DIVIDEND_SCHEDULE)"``).
     |
     | When reading a ``TimeSeries`` from the database, the library knows that it should
     | also read the components as ``TimeSeries`` objects. This is useful to store instruments
@@ -57,7 +57,7 @@ class TimeSeries:
     | time series to be well defined.
     |
     | The library doesn't enforce any of the above naming conventions, except
-    | the special treatment to the ``"COMPONENTS"`` attribute.
+    | the special treatment of the ``"COMPONENTS"`` attribute.
     """
     def __init__(self, timeseries):
         if isinstance(timeseries, str):

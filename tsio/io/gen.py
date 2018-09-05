@@ -1,9 +1,26 @@
+"""
+GenIO class - Generalized reading class for TimeSeries.
+"""
 import numpy as np
 from tsio.timeseriescollection import TimeSeriesCollection
 from tsio.io.db import DBIO, convert_to_ts_collection, instantiate_components
 
 
 def generate_source_map(ts, external_interfaces):
+    """ Map reading sources with time series.
+
+    Parameters
+    ----------
+    ts: :py:class:`TimeSeries`
+        A time series.
+    external_interfaces: list(objects)
+        Instances of external reading classes.
+
+    Returns
+    -------
+    dict
+        Dictionary with ``{source_index: time_series_collection}`` pairs.
+    """
     source_map = dict()
     ts_collection = convert_to_ts_collection(ts)
     for ts in ts_collection:
@@ -18,6 +35,22 @@ def generate_source_map(ts, external_interfaces):
 
 
 def flatten(ts, components=True, depth=np.inf):
+    """ Create a :py:class:`TimeSeriesCollection` with passed time series and their components.
+
+    Parameters
+    ----------
+    ts: type convertible to :py:obj:`TimeSeriesCollection`
+        Time series collection whose components are to be "flattened".
+    components: list(str), optional
+        Components to include in the final time series collection. Default is all components.
+    depth: int, optional
+        Depth of components to include in the final time series collection. Default is infinity.
+
+    Returns
+    -------
+    :py:obj:`TimeSeriesCollection`
+        Flattened time series collection.
+    """
     if isinstance(components, list):
         components = [key.upper() for key in components]
     flattened = TimeSeriesCollection()
@@ -36,6 +69,34 @@ def flatten(ts, components=True, depth=np.inf):
 
 
 class GenIO(DBIO):
+    """ Generalized reading interface, for reading time series from the database and also external sources.
+
+    The "write" methods behave just like in the :py:class:`DBIO` class. The "read" methods first read from the
+    database, the use the external reading interfaces to read from external sources. The external interfaces are
+    responsible for resolving whether a time series should be read with it or not with a is_member method.
+    (see TODO(example)).
+
+    Note
+    ----
+    Each external reading class should have methods with the below signatures:
+
+    * ``bool is_member(ts)``: Check whether a time series should be read with this class.
+    * ``read_attributes(ts, attributes)``: Read from source the attributes of a time series collection.
+    * ``read_values(ts)``: Read from source the values of a time series collection.
+    * ``read(ts)``: Read from source the attributes and values of a time series collection.
+
+    Parameters
+    ----------
+    host_address: str
+        Address of the MongoDB daemon.
+    db_name: str
+        MongoDB database name.
+    collection_name: str
+        MongoDB collection.
+    external_interfaces: list(obj)
+        Instances of external reading classes.
+
+    """
     def __init__(self, host_address, db_name, collection_name, external_interfaces=None):
         super().__init__(host_address=host_address, db_name=db_name, collection_name=collection_name)
         if not external_interfaces:
@@ -51,8 +112,8 @@ class GenIO(DBIO):
             flat_ts_list = flatten(ts)
             source_map = generate_source_map(flat_ts_list, self.external_interfaces)
             for interface_code, ts_list in source_map.items():
-                self.interfaces_map[interface_code].read_values(ts_collection=ts_list, components=components,
-                                                                depth=depth, attributes=attributes, **kwargs)
+                self.interfaces_map[interface_code].read_attributes(ts_collection=ts_list, attributes=attributes,
+                                                                    **kwargs)
 
     def read_values(self, ts, components=True, depth=np.inf, use_external=True, **kwargs):
         ts = convert_to_ts_collection(ts)
@@ -61,9 +122,7 @@ class GenIO(DBIO):
             flat_ts_list = flatten(ts)
             source_map = generate_source_map(flat_ts_list, self.external_interfaces)
             for interface_code, ts_list in source_map.items():
-                self.interfaces_map[interface_code].read_values(ts_collection=ts_list, components=components,
-                                                                depth=depth,
-                                                                **kwargs)
+                self.interfaces_map[interface_code].read_values(ts_collection=ts_list, **kwargs)
 
     def read(self, ts, components=True, depth=np.inf, use_external=True, **kwargs):
         ts = convert_to_ts_collection(ts)
@@ -72,5 +131,4 @@ class GenIO(DBIO):
             flat_ts_list = flatten(ts)
             source_map = generate_source_map(flat_ts_list, self.external_interfaces)
             for interface_code, ts_list in source_map.items():
-                self.interfaces_map[interface_code].read(ts_collection=ts_list, components=components, depth=depth,
-                                                         **kwargs)
+                self.interfaces_map[interface_code].read(ts_collection=ts_list, **kwargs)

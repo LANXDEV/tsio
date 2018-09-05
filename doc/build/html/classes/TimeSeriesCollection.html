@@ -1,0 +1,366 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>TimeSeriesCollection Class &#8212; Time Series I/O 0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="TimeSeries Class" href="TimeSeries.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Time Series I/O</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=LANXDEV&repo=tsio&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="TimeSeries.html">TimeSeries Class</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">TimeSeriesCollection Class</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="TimeSeries.html" title="previous chapter">TimeSeries Class</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="timeseriescollection-class">
+<h1>TimeSeriesCollection Class<a class="headerlink" href="#timeseriescollection-class" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection">
+<em class="property">class </em><code class="descname">TimeSeriesCollection</code><span class="sig-paren">(</span><em>iterable=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseriescollection.html#TimeSeriesCollection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableSet" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.MutableSet</span></code></a></p>
+<p>Custom <code class="docutils literal notranslate"><span class="pre">OrderedSet</span></code> for <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> objects.</p>
+<p>This container remembers the order in which its members were added, so that every entry has a numeric index that
+can be looked up.</p>
+<dl class="method">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>ts</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseriescollection.html#TimeSeriesCollection.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add <cite>ts</cite> and return its index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ts</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code>) – A TimeSeries to add.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Index of the added TimeSeries.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)">int</a>, None</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If a TimeSeries with the same <code class="docutils literal notranslate"><span class="pre">ts_name</span></code> is already in the container, the method does not modify the
+TimeSeriesCollection and returns the index associated with the previously existing TimeSeries.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection.add_list">
+<code class="descname">add_list</code><span class="sig-paren">(</span><em>iterable</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseriescollection.html#TimeSeriesCollection.add_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection.add_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add iterable of elements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>iterable</strong> (list of str, <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code>) – Elements to add.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection.append">
+<code class="descname">append</code><span class="sig-paren">(</span><em>ts</em><span class="sig-paren">)</span><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add <cite>ts</cite> and return its index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ts</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code>) – A TimeSeries to add.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Index of the added TimeSeries.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)">int</a>, None</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If a TimeSeries with the same <code class="docutils literal notranslate"><span class="pre">ts_name</span></code> is already in the container, the method does not modify the
+TimeSeriesCollection and returns the index associated with the previously existing TimeSeries.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseriescollection.html#TimeSeriesCollection.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all items.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseriescollection.html#TimeSeriesCollection.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection.copy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A copy of this object.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#tsio.timeseriescollection.TimeSeriesCollection" title="tsio.timeseriescollection.TimeSeriesCollection">TimeSeriesCollection</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection.discard">
+<code class="descname">discard</code><span class="sig-paren">(</span><em>ts</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseriescollection.html#TimeSeriesCollection.discard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection.discard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Discard an element.  Does not raise an exception if absent.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ts</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code>, str) – Element to be discarded.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseriescollection.html#TimeSeriesCollection.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection.get" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the element.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Reference to an element in the container.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection.get_attributes">
+<code class="descname">get_attributes</code><span class="sig-paren">(</span><em>field</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseriescollection.html#TimeSeriesCollection.get_attributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection.get_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>field</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The field whose values are to be retrieved.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">attribute values of the contained TimeSeries.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list of objects</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection.index">
+<code class="descname">index</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseriescollection.html#TimeSeriesCollection.index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection.index" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> (iterable of str or <code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeSeries</span></code>) – Element to be looked for.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Index(es) of the given entry(ies).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)">int</a>, list of int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection.isdisjoint">
+<code class="descname">isdisjoint</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection.isdisjoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if two sets have a null intersection.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection.pop">
+<code class="descname">pop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseriescollection.html#TimeSeriesCollection.pop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pops the last-added element.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The popped TimeSeries.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection.remove">
+<code class="descname">remove</code><span class="sig-paren">(</span><em>ts</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseriescollection.html#TimeSeriesCollection.remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove an element. If not a member, raise a KeyError.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection.remove_list">
+<code class="descname">remove_list</code><span class="sig-paren">(</span><em>iterable</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseriescollection.html#TimeSeriesCollection.remove_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection.remove_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Discard an iterable of elements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>iterable</strong> (iterable of str, <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code>) – Elements to be discarded.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection.ts_attributes">
+<code class="descname">ts_attributes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseriescollection.html#TimeSeriesCollection.ts_attributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection.ts_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">ts_attributes</span></code> of the contained TimeSeries.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list of dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection.ts_names">
+<code class="descname">ts_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseriescollection.html#TimeSeriesCollection.ts_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection.ts_names" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Names of the contained TimeSeries.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list of str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection.ts_values">
+<code class="descname">ts_values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseriescollection.html#TimeSeriesCollection.ts_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection.ts_values" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of <code class="docutils literal notranslate"><span class="pre">ts_values</span></code> of the contained TimeSeries.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list of pandas.Series</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseriescollection.TimeSeriesCollection.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>sequence</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseriescollection.html#TimeSeriesCollection.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseriescollection.TimeSeriesCollection.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update <cite>self</cite> with the given iterable.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sequence</strong> (iterable of <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code>) – Elements to add.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Index of the last inserted element.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)">int</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2018, Lanx Capital, Vinícius Calasans.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/classes/TimeSeriesCollection.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
