@@ -6,7 +6,7 @@ from pprint import pformat
 import numpy as np
 import pandas as pd
 from tsio.constants import COMPONENTS
-from tsio.tools import at_index
+from tsio.tools import at_index, to_datetime
 
 _components = COMPONENTS.lower()
 
@@ -231,4 +231,5 @@ class TimeSeries:
         scalar
             Value corresponding to `date`.
         """
+        index = to_datetime(index)
         return at_index(df=self.ts_values, index=index, last_available=last_available, fill_value=fill_value)

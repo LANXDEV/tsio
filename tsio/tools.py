@@ -160,7 +160,11 @@ def at_index(df, index, last_available=True, fill_value=np.nan):
     scalar
 
     """
-    index = to_list(index)
+    index_as_list = to_list(index)
     if last_available:
-        return df.reindex(index, method='pad', fill_value=fill_value).values()
-    return df.reindex(index, fill_value=fill_value)[index].values()
+        result = df.reindex(index_as_list, method='pad', fill_value=fill_value).values
+    else:
+        result = df.reindex(index_as_list, fill_value=fill_value)[index_as_list].values
+    if not isvectorizable(index):
+        return result[0]
+    return result

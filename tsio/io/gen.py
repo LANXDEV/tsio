@@ -125,10 +125,10 @@ class GenIO(DBIO):
         ts = convert_to_ts_collection(ts_collection)
         super().read_attributes(ts_collection=ts, components=components, depth=depth, attributes=attributes)
         if use_external:
-            flat_ts_list = flatten(ts)
-            source_map = generate_source_map(flat_ts_list, self.external_interfaces)
-            for interface_code, ts_list in source_map.items():
-                self.interfaces_map[interface_code].read_attributes(ts_collection=ts_list, attributes=attributes,
+            flat_collection = flatten(ts)
+            source_map = generate_source_map(flat_collection, self.external_interfaces)
+            for interface_code, ts_collection in source_map.items():
+                self.interfaces_map[interface_code].read_attributes(ts_collection=ts_collection, attributes=attributes,
                                                                     **kwargs)
 
     def read_values(self, ts_collection, components=True, depth=np.inf, use_external=True, **kwargs):
@@ -150,10 +150,10 @@ class GenIO(DBIO):
         ts = convert_to_ts_collection(ts_collection)
         super().read(ts_collection=ts, components=components, depth=depth)
         if use_external:
-            flat_ts_list = flatten(ts)
-            source_map = generate_source_map(flat_ts_list, self.external_interfaces)
-            for interface_code, ts_list in source_map.items():
-                self.interfaces_map[interface_code].read_values(ts_collection=ts_list, **kwargs)
+            flat_collection = flatten(ts)
+            source_map = generate_source_map(flat_collection, self.external_interfaces)
+            for interface_code, ts_collection in source_map.items():
+                self.interfaces_map[interface_code].read_values(ts_collection=ts_collection, **kwargs)
 
     def read(self, ts_collection, components=True, depth=np.inf, use_external=True, **kwargs):
         """ Read time series attributes and values from the database.
@@ -174,7 +174,7 @@ class GenIO(DBIO):
         ts = convert_to_ts_collection(ts_collection)
         super().read(ts_collection=ts, components=components, depth=depth)
         if use_external:
-            flat_ts_list = flatten(ts)
-            source_map = generate_source_map(flat_ts_list, self.external_interfaces)
-            for interface_code, ts_list in source_map.items():
-                self.interfaces_map[interface_code].read(ts_collection=ts_list, **kwargs)
+            flat_collection = flatten(ts)
+            source_map = generate_source_map(flat_collection, self.external_interfaces)
+            for interface_code, ts_collection in source_map.items():
+                self.interfaces_map[interface_code].read(ts_collection=ts_collection, **kwargs)
