@@ -540,19 +540,21 @@ class DBIO:
         else:
             return False
 
-    def select(self, mode=AND, available_dates=None, all_fields=False, **kwargs):
+    def select(self, **kwargs):
         """ Get time series names matching attribute specifications.
 
         Parameters
         ----------
-        mode: {"AND", "OR"}, optional
-            Whether to match attributes with "AND" or "OR". Default is "AND".
-        available_dates: list(date-like), optional
-            If not None, return only names of time series that have values at these dates. Default is None.
-        all_fields: bool, optional
-             Whether to return time series with the "FIELD" attribute. Default is False.
         kwargs: dict, optional
             Dictionary of ``{attribute_name: attribute_value}`` pairs to match.
+
+        Note
+        ----
+        * Use ``MODE={"OR", "AND"}`` to choose whether to match attributes with "AND" or "OR". Default is "AND".
+        * Use ``AVAILABLE_DATES=list(date-like)`` to return only names of time series that have values at a set of
+        dates.
+        * Use ``ALL_FIELDS=True`` to choose whether to return time series with the "FIELD" attribute. The default
+        behaviour is to not return these time series.
 
         Returns
         -------
@@ -563,6 +565,10 @@ class DBIO:
         # EXCLUSIVE = 'NO' means it will keep timeseries that do not have one of the attributes. MODE= 'AND'
         # means it will keep only the timeseries with attributes matching all those given.
         kwargs = {str(key).upper(): to_list(value) for key, value in kwargs.items()}
+        mode = kwargs.get("MODE", "AND")
+        all_fields = kwargs.get("ALL_FIELDS")
+        available_dates = kwargs.get("AVAILABLE_DATES")
+
         if FIELD not in kwargs and not all_fields:
             kwargs[FIELD] = [None]
         if mode.upper() == OR:
