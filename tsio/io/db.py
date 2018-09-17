@@ -565,9 +565,10 @@ class DBIO:
         # EXCLUSIVE = 'NO' means it will keep timeseries that do not have one of the attributes. MODE= 'AND'
         # means it will keep only the timeseries with attributes matching all those given.
         kwargs = {str(key).upper(): to_list(value) for key, value in kwargs.items()}
-        mode = kwargs.get("MODE", "AND")
-        all_fields = kwargs.get("ALL_FIELDS")
-        available_dates = kwargs.get("AVAILABLE_DATES")
+        mode = kwargs.pop("MODE", AND)
+        all_fields = kwargs.pop("ALL_FIELDS", None)
+        available_dates = kwargs.pop("AVAILABLE_DATES", None)
+        print(all_fields)
 
         if FIELD not in kwargs and not all_fields:
             kwargs[FIELD] = [None]
