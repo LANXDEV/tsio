@@ -1,5 +1,5 @@
-tsio.io.db module
-=================
+Database Reading/Writing
+========================
 
 .. automodule:: tsio.io.db
     :members:

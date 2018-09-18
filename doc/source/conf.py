@@ -16,7 +16,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'tsio'
+project = 'Time Series I/O'
 copyright = '2018, Lanx Capital & Vinícius Calasans'
 author = 'Lanx Capital & Vinícius Calasans'
 

@@ -1,5 +1,5 @@
-tsio.io.gen module
-==================
+Generalized Reading
+===================
 
 .. automodule:: tsio.io.gen
     :members:

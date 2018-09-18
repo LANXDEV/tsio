@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>tsio.io.db &#8212; Time Series I/O 0.1.0 documentation</title>
+    <title>tsio.io.db &#8212; Time Series I/O 0.0.1 documentation</title>
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
@@ -44,10 +44,11 @@
 
 
 <h3>Navigation</h3>
-<p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../tsio/tsio.timeseries.html">Time Series Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tsio/tsio.timeseries.html">Time Series</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tsio/tsio.timeseriescollection.html">Time Series Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tsio/tsio.io.db.html">Database Reading/Writing Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tsio/tsio.io.gen.html">Generalized Reading Interface</a></li>
 </ul>
 
 <div class="relations">
@@ -620,19 +621,21 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span></div>
 
-<div class="viewcode-block" id="DBIO.select"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.DBIO.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">AND</span><span class="p">,</span> <span class="n">available_dates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">all_fields</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="DBIO.select"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.DBIO.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Get time series names matching attribute specifications.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        mode: {&quot;AND&quot;, &quot;OR&quot;}, optional</span>
-<span class="sd">            Whether to match attributes with &quot;AND&quot; or &quot;OR&quot;. Default is &quot;AND&quot;.</span>
-<span class="sd">        available_dates: list(date-like), optional</span>
-<span class="sd">            If not None, return only names of time series that have values at these dates. Default is None.</span>
-<span class="sd">        all_fields: bool, optional</span>
-<span class="sd">             Whether to return time series with the &quot;FIELD&quot; attribute. Default is False.</span>
 <span class="sd">        kwargs: dict, optional</span>
 <span class="sd">            Dictionary of ``{attribute_name: attribute_value}`` pairs to match.</span>
+
+<span class="sd">        Note</span>
+<span class="sd">        ----</span>
+<span class="sd">        * Use ``MODE={&quot;OR&quot;, &quot;AND&quot;}`` to choose whether to match attributes with &quot;AND&quot; or &quot;OR&quot;. Default is &quot;AND&quot;.</span>
+<span class="sd">        * Use ``AVAILABLE_DATES=list(date-like)`` to return only names of time series that have values at a set of</span>
+<span class="sd">        dates.</span>
+<span class="sd">        * Use ``ALL_FIELDS=True`` to choose whether to return time series with the &quot;FIELD&quot; attribute. The default</span>
+<span class="sd">        behaviour is to not return these time series.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -643,6 +646,11 @@
         <span class="c1"># EXCLUSIVE = &#39;NO&#39; means it will keep timeseries that do not have one of the attributes. MODE= &#39;AND&#39;</span>
         <span class="c1"># means it will keep only the timeseries with attributes matching all those given.</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span> <span class="n">to_list</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;MODE&quot;</span><span class="p">,</span> <span class="n">AND</span><span class="p">)</span>
+        <span class="n">all_fields</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;ALL_FIELDS&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">available_dates</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;AVAILABLE_DATES&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">all_fields</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">FIELD</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">all_fields</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="n">FIELD</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">mode</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="n">OR</span><span class="p">:</span>
@@ -694,7 +702,7 @@
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2018, Lanx Capital, Vinícius Calasans.
+      &copy;2018, Lanx Capital & Vinícius Calasans.
       
       |
       Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
