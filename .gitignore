@@ -21,4 +21,4 @@ ATTRIBUTE_DB - Backup.CSV
 lanxadconfig.conf
 *.egg-info
 *.egg
-doc/build
+/doc/build/
