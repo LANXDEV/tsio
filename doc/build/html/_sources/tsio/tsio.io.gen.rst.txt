@@ -1,7 +1,0 @@
-Generalized Reading Interface
-=============================
-
-.. automodule:: tsio.io.gen
-    :members:
-    :undoc-members:
-    :show-inheritance:

@@ -1,7 +1,0 @@
-TimeSeries Class
-================
-.. currentmodule:: tsio.timeseries
-.. autoclass:: TimeSeries
-   :members:
-
-

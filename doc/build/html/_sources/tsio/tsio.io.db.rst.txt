@@ -1,7 +1,0 @@
-Database Reading/Writing Interface
-==================================
-
-.. automodule:: tsio.io.db
-    :members:
-    :undoc-members:
-    :show-inheritance:
