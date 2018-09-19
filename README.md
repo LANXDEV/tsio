@@ -1,11 +1,13 @@
 # Time Series I/O
 
-This project implements a simple Time Series object and interfaces for reading and writing these objects with MongoDB.
-It also provides a generalized reading interface. This 'interface' is a class that receives specific objects upon its
-instantiation. These objects are then used for reading Time Series data from external sources.
+This project implements a simple Time Series object and an interface for reading and writing these objects with MongoDB.
+It also provides a generalized reading interface. This 'interface' is a class that receives specific reader objects upon
+its instantiation. These objects are then used for reading Time Series data from external sources.
 
 ## Requirements
-- A MongoDB instance
+- A running MongoDB instance
+
+See also the Dependencies section below.
 
 ## Installation
 
@@ -20,7 +22,6 @@ pip install git+https://github.com/LANXDEV/tsio/
 
 
 ## Authors
-* **Lanx Capital** - [LanxDEV](https://github.com/LANXDEV)
 * **Vinícius Calasans** - [vcalasans](https://github.com/vcalasans)
 
 
