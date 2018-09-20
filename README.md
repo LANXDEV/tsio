@@ -4,6 +4,8 @@ This project implements a simple Time Series object and an interface for reading
 It also provides a generalized reading interface. This 'interface' is a class that receives specific reader objects upon
 its instantiation. These objects are then used for reading Time Series data from external sources.
 
+Check the project's [Documentation](https://lanxdev.github.io/tsio/index).
+
 ## Requirements
 - A running MongoDB instance
 
@@ -25,6 +27,11 @@ pip install git+https://github.com/LANXDEV/tsio/
 * **Vinícius Calasans** - [vcalasans](https://github.com/vcalasans)
 
 
+## Acknowledgements
+
+Time Series I/O has been developed at [Lanx Capital Investimentos](https://www.lanxcapital.com/) since 2016.
+
+
 ## License
 
-This project is licensed under the GNU GPL v3. See [License](LICENSE) for details.
+This project is licensed under the GNU LGPL v3. See [Copying](COPYING) and [Copying.Lesser](COPYING.LESSER) for details.
