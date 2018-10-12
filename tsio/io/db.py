@@ -584,7 +584,6 @@ class DBIO:
         mode = kwargs.pop("MODE", AND)
         all_fields = kwargs.pop("ALL_FIELDS", None)
         available_dates = kwargs.pop("AVAILABLE_DATES", None)
-        print(all_fields)
 
         if FIELD not in kwargs and not all_fields:
             kwargs[FIELD] = [None]
