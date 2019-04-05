@@ -565,17 +565,18 @@ class DBIO:
         # EXCLUSIVE = 'NO' means it will keep timeseries that do not have one of the attributes. MODE= 'AND'
         # means it will keep only the timeseries with attributes matching all those given.
         kwargs = {str(key).upper(): to_list(value) for key, value in kwargs.items()}
-        mode = kwargs.pop("MODE", AND)
-        all_fields = kwargs.pop("ALL_FIELDS", None)
-        available_dates = kwargs.pop("AVAILABLE_DATES", None)
-        print(all_fields)
+        mode = kwargs.pop("MODE", "AND")
+        all_fields = kwargs.pop("ALL_FIELDS", False)
+        # available_dates = kwargs.pop("AVAILABLE_DATES", None)
+        available_dates = kwargs.pop("AVAILABLE", None)
 
-        if FIELD not in kwargs and not all_fields:
-            kwargs[FIELD] = [None]
-        if mode.upper() == OR:
+        if 'FIELD' not in kwargs and not all_fields:
+            kwargs['FIELD'] = [None]
+
+        if mode.upper() in ('OR', 'OU'):
             filtered_collection = self.db.find({'$or': [{i: {'$in': list(v)}} for i, v in kwargs.items()]},
                                                {TS_NAME: 1})
-        elif mode.upper() == AND:
+        elif mode.upper() in ('AND', 'E'):
             filtered_collection = self.db.find({'$and': [{i: {'$in': list(v)}} for i, v in kwargs.items()]},
                                                {TS_NAME: 1})
         else:
@@ -590,6 +591,7 @@ class DBIO:
             self.read_values(new_collection)
             new_collection = TimeSeriesCollection([ts for ts in new_collection if
                                                    bool(set(available_date) & set(ts.ts_values.index))])
+
         return new_collection
 
     def search(self, **kwargs):
