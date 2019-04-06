@@ -104,7 +104,7 @@ class TimeSeriesCollection(collections.MutableSet):
         if len(self) == 0:
             # The state can't be an empty list.
             # We need to return a truthy value, or else __setstate__ won't be run.
-            return (None,)
+            return None
         else:
             return list(self)
 
