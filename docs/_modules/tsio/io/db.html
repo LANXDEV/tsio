@@ -1,0 +1,717 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>tsio.io.db &#8212; Time Series I/O 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Time Series I/O</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=LANXDEV&repo=tsio&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tsio/tsio.timeseries.html">Time Series</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tsio/tsio.timeseriescollection.html">Time Series Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tsio/tsio.io.db.html">Database Reading/Writing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tsio/tsio.io.gen.html">Generalized Reading</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for tsio.io.db</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">DBIO class for reading/writing TimeSeries from/in MongoDB collections.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pymongo</span>
+<span class="kn">from</span> <span class="nn">pymongo.errors</span> <span class="k">import</span> <span class="n">BulkWriteError</span>
+<span class="kn">from</span> <span class="nn">tsio.constants</span> <span class="k">import</span> <span class="n">COMPONENTS</span><span class="p">,</span> <span class="n">TS_NAME</span><span class="p">,</span> <span class="n">TS_VALUES</span><span class="p">,</span> <span class="n">LAST_USE</span><span class="p">,</span> <span class="n">RESERVED_KEYS</span><span class="p">,</span> <span class="n">OR</span><span class="p">,</span> <span class="n">AND</span><span class="p">,</span> <span class="n">FIELD</span>
+<span class="kn">from</span> <span class="nn">tsio.tools</span> <span class="k">import</span> <span class="n">to_list</span>
+<span class="kn">from</span> <span class="nn">tsio.timeseries</span> <span class="k">import</span> <span class="n">TimeSeries</span>
+<span class="kn">from</span> <span class="nn">tsio.timeseriescollection</span> <span class="k">import</span> <span class="n">TimeSeriesCollection</span>
+
+
+<div class="viewcode-block" id="convert_to_ts_collection"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.convert_to_ts_collection">[docs]</a><span class="k">def</span> <span class="nf">convert_to_ts_collection</span><span class="p">(</span><span class="n">ts</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Convert a time series list-like object into :py:class:`TimeSeriesCollection`</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ts: :py:class:`TimeSeries`, :py:class:`TimeSeriesCollection`, str, list (str, :py:class:`TimeSeries`)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    :py:class:`TimeSeriesCollection`</span>
+<span class="sd">        Object built with the passed time series list-like.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">TimeSeriesCollection</span><span class="p">()</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">TimeSeriesCollection</span><span class="p">()</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">TimeSeriesCollection</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ts</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">TimeSeriesCollection</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ts</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="ts_to_dict"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.ts_to_dict">[docs]</a><span class="k">def</span> <span class="nf">ts_to_dict</span><span class="p">(</span><span class="n">ts</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Convert :py:class:`TimeSeries` to dict, for writing in the database.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ts: object convertible to :py:class:`TimeSeriesCollection`</span>
+<span class="sd">        A time series.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        Dictionary ready to be written in MongoDB.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">json_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">ts_collection</span> <span class="o">=</span> <span class="n">convert_to_ts_collection</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">ts_collection</span><span class="p">:</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="n">ts_attributes_to_dict</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+        <span class="n">entry</span><span class="p">[</span><span class="n">TS_NAME</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">ts_name</span>
+        <span class="n">entry</span><span class="p">[</span><span class="n">TS_VALUES</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts_values_to_dict</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+        <span class="n">json_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">json_list</span></div>
+
+
+<div class="viewcode-block" id="ts_attributes_to_dict"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.ts_attributes_to_dict">[docs]</a><span class="k">def</span> <span class="nf">ts_attributes_to_dict</span><span class="p">(</span><span class="n">ts</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Convert a :py:class:`TimeSeries` ``ts_attributes`` element into a dict.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ts: :py:class:`TimeSeries`</span>
+<span class="sd">        Time series.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        Dictionary ready to be written in MongoDB.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">attributes</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">ts_attributes</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">components</span> <span class="o">=</span> <span class="n">attributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">COMPONENTS</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">components</span><span class="p">:</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="n">components</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">attributes</span><span class="p">[</span><span class="n">COMPONENTS</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">components</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="p">):</span>
+                <span class="n">attributes</span><span class="p">[</span><span class="n">COMPONENTS</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">ts_name</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> has a component that is neither a TimeSeries nor a string&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">ts_name</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">attributes</span></div>
+
+
+<div class="viewcode-block" id="ts_values_to_dict"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.ts_values_to_dict">[docs]</a><span class="k">def</span> <span class="nf">ts_values_to_dict</span><span class="p">(</span><span class="n">ts</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Convert a :py:class:`TimeSeries` ``ts_values`` element into a dict.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ts: :py:class:`TimeSeries`</span>
+<span class="sd">        Time series.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        Dictionary ready to be written in MongoDB.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">ts_values</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">values</span></div>
+
+
+<div class="viewcode-block" id="instantiate_components"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.instantiate_components">[docs]</a><span class="k">def</span> <span class="nf">instantiate_components</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">components</span><span class="p">,</span> <span class="n">ts_collection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Convert inplace the string values in the &#39;Components&#39; dict of a time series into time series objects.</span>
+
+<span class="sd">    Also stores these components in a given time series collection.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ts: :py:class:`TimeSeries`</span>
+<span class="sd">        Time series.</span>
+<span class="sd">    components: list(str)</span>
+<span class="sd">        List of component names to instantiate (keys of the &#39;Components&#39; dict).</span>
+<span class="sd">    ts_collection: :py:class:`TimeSeriesCollection`</span>
+<span class="sd">        A time series collection to store the instantiated components.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">components</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">components</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">ts_components</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="n">COMPONENTS</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ts_components</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">ts_components</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
+                            <span class="n">new_ts</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                            <span class="n">ts_components</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_ts</span>
+                            <span class="n">ts_collection</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_ts</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">components</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">ts_components</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="n">COMPONENTS</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ts_components</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">ts_components</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">new_ts</span> <span class="o">=</span> <span class="n">TimeSeries</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                        <span class="n">ts_components</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_ts</span>
+                        <span class="n">ts_collection</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_ts</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DBIO"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.DBIO">[docs]</a><span class="k">class</span> <span class="nc">DBIO</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Class for reading/writing time series in MongoDB.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    host_address: str</span>
+<span class="sd">        Address of the MongoDB daemon.</span>
+<span class="sd">    db_name: str</span>
+<span class="sd">        MongoDB database name.</span>
+<span class="sd">    collection_name: str</span>
+<span class="sd">        MongoDB collection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host_address</span><span class="p">,</span> <span class="n">db_name</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">host_address</span> <span class="o">=</span> <span class="n">host_address</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="n">db_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">pymongo</span><span class="o">.</span><span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host_address</span><span class="p">)[</span><span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
+
+<div class="viewcode-block" id="DBIO.read_attributes"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.DBIO.read_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">read_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts_collection</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Read time series attributes from the database.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ts_collection: type convertible to :py:class:`TimeSeriesCollection`</span>
+<span class="sd">            Time series to be read.</span>
+<span class="sd">        components: list(str), optional</span>
+<span class="sd">            Optional collection of component names to be read and instantiated. Default is all components.</span>
+<span class="sd">        depth: int, optional</span>
+<span class="sd">            Depth of component instantiation. ``depth = 1`` means no components are instantiated. Default is infinity.</span>
+<span class="sd">        attributes: list(str), optional</span>
+<span class="sd">            Optional collection of attribute names to be read. Default is all attributes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">components</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">components</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">components</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">attributes</span> <span class="ow">and</span> <span class="n">attributes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">attr_specs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">attr_specs</span><span class="p">[</span><span class="n">TS_NAME</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">attr</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="n">attr_specs</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">attr_specs</span> <span class="o">=</span> <span class="p">{</span><span class="n">TS_VALUES</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+        <span class="n">temp_ts_collection</span> <span class="o">=</span> <span class="n">convert_to_ts_collection</span><span class="p">(</span><span class="n">ts_collection</span><span class="p">)</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">all_names_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="k">while</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">depth</span><span class="p">:</span>
+            <span class="n">ts_collection</span> <span class="o">=</span> <span class="n">temp_ts_collection</span>
+            <span class="n">names_list</span> <span class="o">=</span> <span class="n">ts_collection</span><span class="o">.</span><span class="n">ts_names</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">names_list</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">query_bulk_result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="n">TS_NAME</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="n">names_list</span><span class="p">}},</span> <span class="n">attr_specs</span><span class="p">))</span>
+            <span class="n">all_names_list</span> <span class="o">+=</span> <span class="n">names_list</span>
+            <span class="n">temp_ts_collection</span> <span class="o">=</span> <span class="n">TimeSeriesCollection</span><span class="p">()</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">query_bulk_result</span><span class="p">:</span>
+                <span class="n">ts</span> <span class="o">=</span> <span class="n">ts_collection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="n">TS_NAME</span><span class="p">])</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="p">):</span>
+                    <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="n">TS_NAME</span><span class="p">]</span>
+                    <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;_id&#39;</span><span class="p">]</span>
+                    <span class="n">ts</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">depth</span><span class="p">:</span>
+                        <span class="n">instantiate_components</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">components</span><span class="p">,</span> <span class="n">temp_ts_collection</span><span class="p">)</span>
+
+        <span class="c1"># Now updating LAST_USE attribute for the requested TimeSeries</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">update_many</span><span class="p">({</span><span class="n">TS_NAME</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="n">all_names_list</span><span class="p">}},</span>
+                            <span class="p">{</span><span class="s1">&#39;$set&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">LAST_USE</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()}})</span></div>
+
+<div class="viewcode-block" id="DBIO.read_values"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.DBIO.read_values">[docs]</a>    <span class="k">def</span> <span class="nf">read_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts_collection</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Read time series values from the database.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ts_collection: type convertible to :py:class:`TimeSeriesCollection`</span>
+<span class="sd">            Time series to be read.</span>
+<span class="sd">        components: list(str), optional</span>
+<span class="sd">            Optional collection of component names to be read and instantiated. Default is all components.</span>
+<span class="sd">        depth: int, optional</span>
+<span class="sd">            Depth of component instantiation. ``depth = 1`` means no components are instantiated. Default is infinity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">components</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">components</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">components</span><span class="p">]</span>
+
+        <span class="n">temp_ts_collection</span> <span class="o">=</span> <span class="n">convert_to_ts_collection</span><span class="p">(</span><span class="n">ts_collection</span><span class="p">)</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">all_names_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="k">while</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">depth</span><span class="p">:</span>
+            <span class="n">ts_collection</span> <span class="o">=</span> <span class="n">temp_ts_collection</span>
+            <span class="n">names_list</span> <span class="o">=</span> <span class="n">ts_collection</span><span class="o">.</span><span class="n">ts_names</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">names_list</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">query_bulk_result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="n">TS_NAME</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="n">names_list</span><span class="p">}},</span> <span class="p">{</span><span class="n">TS_NAME</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">TS_VALUES</span><span class="p">:</span> <span class="mi">1</span><span class="p">}))</span>
+            <span class="n">all_names_list</span> <span class="o">+=</span> <span class="n">names_list</span>
+            <span class="n">temp_ts_collection</span> <span class="o">=</span> <span class="n">TimeSeriesCollection</span><span class="p">()</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">query_bulk_result</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="n">TS_VALUES</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                    <span class="n">ts</span> <span class="o">=</span> <span class="n">ts_collection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="n">TS_NAME</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="p">):</span>
+                        <span class="n">new_values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="n">TS_VALUES</span><span class="p">])</span>
+                        <span class="n">new_values</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">new_values</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;ms&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
+                        <span class="n">ts</span><span class="o">.</span><span class="n">update_values</span><span class="p">(</span><span class="n">new_values</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">depth</span><span class="p">:</span>
+                            <span class="n">instantiate_components</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">components</span><span class="p">,</span> <span class="n">temp_ts_collection</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DBIO.read"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.DBIO.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts_collection</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Read time series attributes and values from the database.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ts_collection: type convertible to :py:class:`TimeSeriesCollection`</span>
+<span class="sd">            Time series to be read.</span>
+<span class="sd">        components: list(str), optional</span>
+<span class="sd">            Optional collection of component names to be read and instantiated. Default is all components.</span>
+<span class="sd">        depth: int, optional</span>
+<span class="sd">            Depth of component instantiation. ``depth = 1`` means no components are instantiated. Default is infinity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">components</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">components</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">components</span><span class="p">]</span>
+
+        <span class="n">temp_ts_collection</span> <span class="o">=</span> <span class="n">convert_to_ts_collection</span><span class="p">(</span><span class="n">ts_collection</span><span class="p">)</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">all_names_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">depth</span><span class="p">:</span>
+            <span class="n">ts_collection</span> <span class="o">=</span> <span class="n">temp_ts_collection</span>
+            <span class="n">names_list</span> <span class="o">=</span> <span class="n">ts_collection</span><span class="o">.</span><span class="n">ts_names</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">names_list</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">query_bulk_result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="n">TS_NAME</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="n">names_list</span><span class="p">}}))</span>
+            <span class="n">all_names_list</span> <span class="o">+=</span> <span class="n">names_list</span>
+            <span class="n">temp_ts_collection</span> <span class="o">=</span> <span class="n">TimeSeriesCollection</span><span class="p">()</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">new_values_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">query_bulk_result</span><span class="p">:</span>
+                <span class="n">ts</span> <span class="o">=</span> <span class="n">ts_collection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="n">TS_NAME</span><span class="p">])</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="p">):</span>
+                    <span class="n">new_values_dict</span><span class="p">[</span><span class="n">TS_VALUES</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">TS_VALUES</span><span class="p">]</span>
+                    <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="n">TS_VALUES</span><span class="p">]</span>
+                    <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;_id&#39;</span><span class="p">]</span>
+                    <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="n">TS_NAME</span><span class="p">]</span>
+                    <span class="n">ts</span><span class="o">.</span><span class="n">update_attributes</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                    <span class="n">new_values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">new_values_dict</span><span class="p">[</span><span class="n">TS_VALUES</span><span class="p">])</span>
+                    <span class="n">new_values</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">new_values</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;ms&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
+                    <span class="n">ts</span><span class="o">.</span><span class="n">update_values</span><span class="p">(</span><span class="n">new_values</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">depth</span><span class="p">:</span>
+                        <span class="n">instantiate_components</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">components</span><span class="p">,</span> <span class="n">temp_ts_collection</span><span class="p">)</span>
+
+        <span class="c1"># Now updating LAST_USE attribute for the requested TimeSeries</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">update_many</span><span class="p">({</span><span class="n">TS_NAME</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="n">all_names_list</span><span class="p">}},</span>
+                            <span class="p">{</span><span class="s1">&#39;$set&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">LAST_USE</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()}})</span></div>
+
+<div class="viewcode-block" id="DBIO.write_attributes"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.DBIO.write_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">write_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts_collection</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Write time series attributes to the database.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ts_collection: type convertible to :py:class:`TimeSeriesCollection`</span>
+<span class="sd">            Time series to be written.</span>
+<span class="sd">        components: list(str), optional</span>
+<span class="sd">            Optional collection of component names to be written. Default is all components.</span>
+<span class="sd">        depth: int, optional</span>
+<span class="sd">            Depth of component writing. ``depth = 1`` means no components are written. Default is infinity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">components</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">components</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">components</span><span class="p">]</span>
+        <span class="n">temp_ts_collection</span> <span class="o">=</span> <span class="n">convert_to_ts_collection</span><span class="p">(</span><span class="n">ts_collection</span><span class="p">)</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">full_ts_collection</span> <span class="o">=</span> <span class="n">TimeSeriesCollection</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">depth</span><span class="p">:</span>
+            <span class="n">ts_collection</span> <span class="o">=</span> <span class="n">temp_ts_collection</span>
+            <span class="n">names_list</span> <span class="o">=</span> <span class="n">ts_collection</span><span class="o">.</span><span class="n">ts_names</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">names_list</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">full_ts_collection</span><span class="o">.</span><span class="n">add_list</span><span class="p">(</span><span class="n">ts_collection</span><span class="p">)</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">temp_ts_collection</span> <span class="o">=</span> <span class="n">TimeSeriesCollection</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">names_list</span><span class="p">:</span>
+                <span class="n">ts</span> <span class="o">=</span> <span class="n">ts_collection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="p">)</span> <span class="ow">and</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">depth</span><span class="p">:</span>
+                    <span class="n">instantiate_components</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">components</span><span class="p">,</span> <span class="n">temp_ts_collection</span><span class="p">)</span>
+
+        <span class="n">documents</span> <span class="o">=</span> <span class="n">ts_to_dict</span><span class="p">(</span><span class="n">full_ts_collection</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">documents</span><span class="p">:</span>
+            <span class="n">bulkop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">initialize_ordered_bulk_op</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">document</span> <span class="ow">in</span> <span class="n">documents</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">document</span><span class="p">:</span>  <span class="c1"># Some fine tuning in encoding. e.g. MongoDB does not accept numpy.int64.</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">document</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
+                            <span class="n">document</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asscalar</span><span class="p">(</span><span class="n">document</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Remove values from the document, we are only updating the attributes</span>
+                    <span class="k">del</span> <span class="n">document</span><span class="p">[</span><span class="n">TS_VALUES</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+                <span class="n">bulkop</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="n">TS_NAME</span><span class="p">:</span> <span class="n">document</span><span class="p">[</span><span class="n">TS_NAME</span><span class="p">]})</span><span class="o">.</span><span class="n">upsert</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;$set&#39;</span><span class="p">:</span> <span class="n">document</span><span class="p">})</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">bulkop</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">BulkWriteError</span> <span class="k">as</span> <span class="n">bwe</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">bwe</span><span class="o">.</span><span class="n">details</span><span class="p">)</span>
+                <span class="n">werrors</span> <span class="o">=</span> <span class="n">bwe</span><span class="o">.</span><span class="n">details</span><span class="p">[</span><span class="s1">&#39;writeErrors&#39;</span><span class="p">]</span>
+                <span class="nb">input</span><span class="p">(</span><span class="n">werrors</span><span class="p">)</span>
+                <span class="k">raise</span></div>
+
+<div class="viewcode-block" id="DBIO.write"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.DBIO.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts_collection</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Write time series attributes and values to the database.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ts_collection: type convertible to :py:class:`TimeSeriesCollection`</span>
+<span class="sd">            Time series to be written.</span>
+<span class="sd">        components: list(str), optional</span>
+<span class="sd">            Optional collection of component names to be written. Default is all components.</span>
+<span class="sd">        depth: int, optional</span>
+<span class="sd">            Depth of component writing. ``depth = 1`` means no components are written. Default is infinity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">components</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">components</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">components</span><span class="p">]</span>
+
+        <span class="n">temp_ts_collection</span> <span class="o">=</span> <span class="n">convert_to_ts_collection</span><span class="p">(</span><span class="n">ts_collection</span><span class="p">)</span>
+        <span class="n">to_updating_collection_names</span> <span class="o">=</span> <span class="n">temp_ts_collection</span><span class="o">.</span><span class="n">ts_names</span><span class="p">()[:]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">to_updating_collection_names</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1000</span><span class="p">:</span>
+            <span class="n">new_ts_collection</span> <span class="o">=</span> <span class="n">TimeSeriesCollection</span><span class="p">(</span><span class="n">temp_ts_collection</span><span class="p">)</span>
+            <span class="n">temp_ts_collection</span><span class="o">.</span><span class="n">remove_list</span><span class="p">(</span><span class="n">to_updating_collection_names</span><span class="p">[</span><span class="mi">998</span><span class="p">:])</span>
+            <span class="n">new_ts_collection</span><span class="o">.</span><span class="n">remove_list</span><span class="p">(</span><span class="n">to_updating_collection_names</span><span class="p">[:</span><span class="mi">998</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">new_ts_collection</span><span class="p">,</span> <span class="n">components</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
+
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">full_ts_collection</span> <span class="o">=</span> <span class="n">TimeSeriesCollection</span><span class="p">()</span>
+
+        <span class="k">while</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">depth</span><span class="p">:</span>
+            <span class="n">ts_collection</span> <span class="o">=</span> <span class="n">temp_ts_collection</span>
+            <span class="n">names_list</span> <span class="o">=</span> <span class="n">ts_collection</span><span class="o">.</span><span class="n">ts_names</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">names_list</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">full_ts_collection</span><span class="o">.</span><span class="n">add_list</span><span class="p">(</span><span class="n">ts_collection</span><span class="p">)</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">temp_ts_collection</span> <span class="o">=</span> <span class="n">TimeSeriesCollection</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">names_list</span><span class="p">:</span>
+                <span class="n">ts</span> <span class="o">=</span> <span class="n">ts_collection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="p">)</span> <span class="ow">and</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">depth</span><span class="p">:</span>
+                    <span class="n">instantiate_components</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">components</span><span class="p">,</span> <span class="n">temp_ts_collection</span><span class="p">)</span>
+
+        <span class="n">documents</span> <span class="o">=</span> <span class="n">ts_to_dict</span><span class="p">(</span><span class="n">full_ts_collection</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">documents</span><span class="p">:</span>
+            <span class="n">bulkop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">initialize_ordered_bulk_op</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">document</span> <span class="ow">in</span> <span class="n">documents</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">document</span><span class="p">:</span>  <span class="c1"># Some fine tuning in encoding. e.g. MongoDB does not accept numpy.int64.</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">document</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
+                            <span class="n">document</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asscalar</span><span class="p">(</span><span class="n">document</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isnull</span><span class="p">(</span><span class="n">document</span><span class="p">[</span><span class="n">key</span><span class="p">]):</span>
+                        <span class="n">document</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">bulkop</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="n">TS_NAME</span><span class="p">:</span> <span class="n">document</span><span class="p">[</span><span class="n">TS_NAME</span><span class="p">]})</span><span class="o">.</span><span class="n">upsert</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;$set&#39;</span><span class="p">:</span> <span class="n">document</span><span class="p">})</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">retval</span> <span class="o">=</span> <span class="n">bulkop</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">retval</span>
+            <span class="k">except</span> <span class="n">BulkWriteError</span> <span class="k">as</span> <span class="n">bwe</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">bwe</span><span class="o">.</span><span class="n">details</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">bwe</span></div>
+
+<div class="viewcode-block" id="DBIO.remove"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.DBIO.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts_collection</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">confirm</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Remove time series from the database.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ts_collection: type convertible to :py:class:`TimeSeriesCollection`</span>
+<span class="sd">            Time series to be removed.</span>
+<span class="sd">        components: list(str), optional</span>
+<span class="sd">            Optional collection of component names to be removed. Default is no components.</span>
+<span class="sd">        depth: int, optional</span>
+<span class="sd">            Depth of component removal. ``depth = 1`` means no components are removed. Default is 1.</span>
+<span class="sd">        confirm: bool, optional</span>
+<span class="sd">            Confirm before removing. Default is True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">components</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">components</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">components</span><span class="p">]</span>
+        <span class="n">ts_collection</span> <span class="o">=</span> <span class="n">convert_to_ts_collection</span><span class="p">(</span><span class="n">ts_collection</span><span class="p">)</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">full_ts_collection</span> <span class="o">=</span> <span class="n">TimeSeriesCollection</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">depth</span><span class="p">:</span>
+            <span class="n">names_list</span> <span class="o">=</span> <span class="n">ts_collection</span><span class="o">.</span><span class="n">ts_names</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">names_list</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">full_ts_collection</span><span class="o">.</span><span class="n">add_list</span><span class="p">(</span><span class="n">ts_collection</span><span class="p">)</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">ts_collection</span> <span class="o">=</span> <span class="n">TimeSeriesCollection</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">names_list</span><span class="p">:</span>
+                <span class="n">ts</span> <span class="o">=</span> <span class="n">full_ts_collection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="p">):</span>
+                    <span class="n">instantiate_components</span><span class="p">(</span><span class="n">ts</span><span class="p">,</span> <span class="n">components</span><span class="p">,</span> <span class="n">ts_collection</span><span class="p">)</span>
+
+        <span class="n">names_to_delete</span> <span class="o">=</span> <span class="n">full_ts_collection</span><span class="o">.</span><span class="n">ts_names</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">confirm</span><span class="p">:</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">ans</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Are you sure you want to delete </span><span class="si">{0}</span><span class="s1"> TimeSeries from the </span><span class="si">{1}</span><span class="s1"> database? </span><span class="se">\n</span><span class="s1"> &#39;</span>
+                            <span class="s1">&#39;[(y) (n) (l)]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names_to_delete</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">))</span>
+                <span class="n">ans</span> <span class="o">=</span> <span class="n">ans</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">ans</span> <span class="o">==</span> <span class="s1">&#39;l&#39;</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">names_to_delete</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">ans</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Aborting &#39;remove&#39; operation.&quot;</span><span class="p">)</span>
+                    <span class="k">return</span>
+                <span class="k">elif</span> <span class="n">ans</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>
+                    <span class="k">break</span>
+        <span class="k">if</span> <span class="n">names_to_delete</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">remove</span><span class="p">({</span><span class="n">TS_NAME</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="n">names_to_delete</span><span class="p">}}))</span></div>
+
+<div class="viewcode-block" id="DBIO.attribute_names"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.DBIO.attribute_names">[docs]</a>    <span class="k">def</span> <span class="nf">attribute_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return set of attribute names in the database.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ts_names: list(str), optional</span>
+<span class="sd">            Optional list of time series names to be used for searching attributes. Default is None (use the entire</span>
+<span class="sd">            database).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list(str)</span>
+<span class="sd">            All the attribute names in `ts_names` or in the database.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">all_attributes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ts_names</span><span class="p">:</span>
+            <span class="n">all_docs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">find</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">all_docs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="n">TS_NAME</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="n">ts_names</span><span class="p">}},</span> <span class="p">{</span><span class="n">TS_VALUES</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+
+        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">all_docs</span><span class="p">:</span>
+            <span class="n">all_attributes</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">all_attributes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">all_attributes</span><span class="p">))</span>
+        <span class="n">all_attributes</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_attributes</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">RESERVED_KEYS</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">all_attributes</span></div>
+
+<div class="viewcode-block" id="DBIO.read_all_attribute_values"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.DBIO.read_all_attribute_values">[docs]</a>    <span class="k">def</span> <span class="nf">read_all_attribute_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return set of attribute values in the database.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        attributes: list(str), optional</span>
+<span class="sd">            Attribute names whose values are to be retrieved. Default is None (use all attribute names in the database).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list(str)</span>
+<span class="sd">            All the attribute values of ``attributes`` or of all the attribute names in the database.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">attributes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attribute_names</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">attributes</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">TS_VALUES</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">attributes</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">COMPONENTS</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="n">all_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+            <span class="n">all_values</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="n">attribute</span><span class="p">))</span>
+        <span class="n">all_values</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">all_values</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">all_values</span></div>
+
+<div class="viewcode-block" id="DBIO.in_db"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.DBIO.in_db">[docs]</a>    <span class="k">def</span> <span class="nf">in_db</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Check if a time series is in the database.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ts: :py:class:`TimeSeries`</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bool</span>
+<span class="sd">            Whether there is a time series with the same name in the database.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">found_entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="n">TS_NAME</span><span class="p">:</span> <span class="n">ts</span><span class="o">.</span><span class="n">ts_name</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">found_entry</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="DBIO.select"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.DBIO.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get time series names matching attribute specifications.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        kwargs: dict, optional</span>
+<span class="sd">            Dictionary of ``{attribute_name: attribute_value}`` pairs to match.</span>
+
+<span class="sd">        Note</span>
+<span class="sd">        ----</span>
+<span class="sd">        * Use ``MODE={&quot;OR&quot;, &quot;AND&quot;}`` to choose whether to match attributes with &quot;AND&quot; or &quot;OR&quot;. Default is &quot;AND&quot;.</span>
+<span class="sd">        * Use ``AVAILABLE_DATES=list(date-like)`` to return only names of time series that have values at a set of</span>
+<span class="sd">        dates.</span>
+<span class="sd">        * Use ``ALL_FIELDS=True`` to choose whether to return time series with the &quot;FIELD&quot; attribute. The default</span>
+<span class="sd">        behaviour is to not return these time series.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list(str)</span>
+<span class="sd">            Names of time series matching the passed specifications.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Loads entire DB, all timeseries (only with names and attributes) and selects by attributes given in arguments.</span>
+        <span class="c1"># EXCLUSIVE = &#39;NO&#39; means it will keep timeseries that do not have one of the attributes. MODE= &#39;AND&#39;</span>
+        <span class="c1"># means it will keep only the timeseries with attributes matching all those given.</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span> <span class="n">to_list</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;MODE&quot;</span><span class="p">,</span> <span class="n">AND</span><span class="p">)</span>
+        <span class="n">all_fields</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;ALL_FIELDS&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">available_dates</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;AVAILABLE_DATES&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">all_fields</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">FIELD</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">all_fields</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="n">FIELD</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">mode</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="n">OR</span><span class="p">:</span>
+            <span class="n">filtered_collection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="s1">&#39;$or&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="n">i</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;$in&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="p">)}}</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()]},</span>
+                                               <span class="p">{</span><span class="n">TS_NAME</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+        <span class="k">elif</span> <span class="n">mode</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="n">AND</span><span class="p">:</span>
+            <span class="n">filtered_collection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="s1">&#39;$and&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="n">i</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;$in&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="p">)}}</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()]},</span>
+                                               <span class="p">{</span><span class="n">TS_NAME</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filtered_collection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">find</span><span class="p">({},</span> <span class="p">{</span><span class="n">TS_NAME</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+
+        <span class="n">new_collection</span> <span class="o">=</span> <span class="n">TimeSeriesCollection</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">filtered_collection</span><span class="p">:</span>
+            <span class="n">new_collection</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="n">TS_NAME</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">available_dates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">available_date</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">,</span> <span class="n">available_dates</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">read_values</span><span class="p">(</span><span class="n">new_collection</span><span class="p">)</span>
+            <span class="n">new_collection</span> <span class="o">=</span> <span class="n">TimeSeriesCollection</span><span class="p">([</span><span class="n">ts</span> <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">new_collection</span> <span class="k">if</span>
+                                                   <span class="nb">bool</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">available_date</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">ts_values</span><span class="o">.</span><span class="n">index</span><span class="p">))])</span>
+        <span class="k">return</span> <span class="n">new_collection</span></div>
+
+<div class="viewcode-block" id="DBIO.search"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.DBIO.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; This method is not yet implemented.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO: Implement this method.</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;The &#39;search&#39; method is not yet implemented. Use the &#39;select&#39; to get all TimeSeries &quot;</span>
+                                  <span class="s2">&quot;in the DataBase and search the resulting collection.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DBIO.ensure_index"><a class="viewcode-back" href="../../../tsio/tsio.io.db.html#tsio.io.db.DBIO.ensure_index">[docs]</a>    <span class="k">def</span> <span class="nf">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create database index for an attribute.</span>
+
+<span class="sd">        Useful to improve performance of attribute matching with the ``select`` method.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        attributes: list(str)</span>
+<span class="sd">            Attribute names for index creation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">report</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+            <span class="n">report</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">create_index</span><span class="p">(</span><span class="n">attribute</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">report</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2018, Lanx Capital & Vinícius Calasans.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

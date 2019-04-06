@@ -1,3 +1,19 @@
+# Copyright (C) 2016-2018 Lanx Capital Investimentos LTDA.
+#
+# This file is part of Time Series I/O (tsio).
+#
+# Time Series I/O (tsio) is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by the
+# Free Software Foundation, either version 3 of the License, or (at your option)
+# any later version.
+#
+# Time Series I/O (tsio) is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+# of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with Time Series I/O (tsio). If not, see <https://www.gnu.org/licenses/>.
 """
 DBIO class for reading/writing TimeSeries from/in MongoDB collections.
 """
@@ -565,6 +581,7 @@ class DBIO:
         # EXCLUSIVE = 'NO' means it will keep timeseries that do not have one of the attributes. MODE= 'AND'
         # means it will keep only the timeseries with attributes matching all those given.
         kwargs = {str(key).upper(): to_list(value) for key, value in kwargs.items()}
+
         mode = kwargs.pop("MODE", "AND")
         all_fields = kwargs.pop("ALL_FIELDS", False)
         # available_dates = kwargs.pop("AVAILABLE_DATES", None)

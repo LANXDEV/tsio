@@ -22,3 +22,4 @@ lanxadconfig.conf
 *.egg-info
 *.egg
 /doc/build/
+*.ipynb_checkpoints/

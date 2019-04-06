@@ -1,0 +1,295 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Time Series &#8212; Time Series I/O 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Time Series Collection" href="tsio.timeseriescollection.html" />
+    <link rel="prev" title="Time Series I/O Documentation" href="../index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Time Series I/O</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=LANXDEV&repo=tsio&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Time Series</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsio.timeseriescollection.html">Time Series Collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsio.io.db.html">Database Reading/Writing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsio.io.gen.html">Generalized Reading</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../index.html" title="previous chapter">Time Series I/O Documentation</a></li>
+      <li>Next: <a href="tsio.timeseriescollection.html" title="next chapter">Time Series Collection</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="time-series">
+<h1>Time Series<a class="headerlink" href="#time-series" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="tsio.timeseries.TimeSeries">
+<em class="property">class </em><code class="descname">TimeSeries</code><span class="sig-paren">(</span><em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseries.html#TimeSeries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseries.TimeSeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Object representing a time series.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timeseries</strong> (str, <a class="reference internal" href="#tsio.timeseries.TimeSeries" title="tsio.timeseries.TimeSeries"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeries</span></code></a>) – A name or a TimeSeries object.</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="tsio.timeseries.TimeSeries.ts_name">
+<code class="descname">ts_name</code><a class="headerlink" href="#tsio.timeseries.TimeSeries.ts_name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The name of the time series.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="tsio.timeseries.TimeSeries.ts_attributes">
+<code class="descname">ts_attributes</code><a class="headerlink" href="#tsio.timeseries.TimeSeries.ts_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> – A dictionary of <code class="docutils literal notranslate"><span class="pre">{str:</span> <span class="pre">attribute_value}</span></code>. <code class="docutils literal notranslate"><span class="pre">attribute_value</span></code> can be any object that is serializable by
+PyMongo’s <code class="docutils literal notranslate"><span class="pre">json_util</span></code> tool.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="tsio.timeseries.TimeSeries.ts_values">
+<code class="descname">ts_values</code><a class="headerlink" href="#tsio.timeseries.TimeSeries.ts_values" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>pandas.Series</em> – Series containing the (<code class="docutils literal notranslate"><span class="pre">datetime</span></code>, <code class="docutils literal notranslate"><span class="pre">scalar</span></code>) pairs of the time series.</p>
+</dd></dl>
+
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<div class="last line-block">
+<div class="line"><strong>Names:</strong></div>
+<div class="line">The <code class="docutils literal notranslate"><span class="pre">ts_name</span></code> attribute serves as the unique identifier for the time series in the</div>
+<div class="line">database and in time series <cite>containers</cite> (<code class="xref py py-class docutils literal notranslate"><span class="pre">TimeSeriesCollection</span></code>).</div>
+<div class="line">Keeping different <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> with the same name is not supported.</div>
+<div class="line"><br /></div>
+<div class="line"><cite>Suggested name patterns:</cite></div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">&quot;(name)(field)&quot;</span></code>: For time series that have a field (e.g. “price”, “quote”, “rating”).</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">&quot;name&quot;</span></code>: For time series that have no fields.</div>
+<div class="line"><br /></div>
+<div class="line"><strong>Components:</strong></div>
+<div class="line">The attribute key <code class="docutils literal notranslate"><span class="pre">&quot;COMPONENTS&quot;</span></code> in <code class="docutils literal notranslate"><span class="pre">ts_attributes</span></code> is treated specially.</div>
+<div class="line">The value of this attribute must be a dict of  <code class="docutils literal notranslate"><span class="pre">{component_type:</span> <span class="pre">component}</span></code>,</div>
+<div class="line">where <code class="docutils literal notranslate"><span class="pre">component_type</span></code> is the type of the component (e.g.: <code class="docutils literal notranslate"><span class="pre">&quot;QUOTE&quot;</span></code>,</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">&quot;CALL_SCHEDULE&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;DIVIDEND_SCHEDULE&quot;</span></code>), and <code class="docutils literal notranslate"><span class="pre">component</span></code> is the name</div>
+<div class="line">of a <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> (e.g.: <code class="docutils literal notranslate"><span class="pre">&quot;(TS_NAME)(QUOTE)&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;(TS_NAME)(CALL_SCHEDULE)&quot;</span></code>,</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">&quot;(TS_NAME)(DIVIDEND_SCHEDULE)&quot;</span></code>).</div>
+<div class="line"><br /></div>
+<div class="line">When reading a <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> from the database, the library knows that it should</div>
+<div class="line">also read the components as <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> objects. This is useful to store instruments</div>
+<div class="line">that need many different <code class="docutils literal notranslate"><span class="pre">TimeSeries</span></code> in order to be well-defined.</div>
+<div class="line">For example, a callable bond needs at least a <code class="docutils literal notranslate"><span class="pre">quote</span></code> and <code class="docutils literal notranslate"><span class="pre">call_schedule</span></code></div>
+<div class="line">time series to be well defined.</div>
+<div class="line"><br /></div>
+<div class="line">The library doesn’t enforce any of the above naming conventions, except</div>
+<div class="line">the special treatment of the <code class="docutils literal notranslate"><span class="pre">&quot;COMPONENTS&quot;</span></code> attribute.</div>
+</div>
+</div>
+<dl class="method">
+<dt id="tsio.timeseries.TimeSeries.empty">
+<code class="descname">empty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseries.html#TimeSeries.empty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseries.TimeSeries.empty" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if both <cite>ts_attributes</cite> and <cite>ts_values</cite> are empty, False otherwise.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseries.TimeSeries.get_attribute">
+<code class="descname">get_attribute</code><span class="sig-paren">(</span><em>attribute_name</em>, <em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseries.html#TimeSeries.get_attribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseries.TimeSeries.get_attribute" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>attribute_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of desired attribute.</li>
+<li><strong>default</strong> (<em>None</em>) – The return value if <cite>attribute_name</cite> is not in <code class="docutils literal notranslate"><span class="pre">self.ts_attributes</span></code>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>attribute_value</strong> – Value of <code class="docutils literal notranslate"><span class="pre">self.ts_attributes[attribute_name]</span></code> if existing, otherwise <cite>default</cite>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)">object</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseries.TimeSeries.get_values">
+<code class="descname">get_values</code><span class="sig-paren">(</span><em>index</em>, <em>last_available=True</em>, <em>fill_value=nan</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseries.html#TimeSeries.get_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseries.TimeSeries.get_values" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>index</strong> (<em>date-like</em>) – Requested date(s).</li>
+<li><strong>last_available</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to use last available data if <cite>date</cite> is missing in the quotes time series.</li>
+<li><strong>fill_value</strong> (<em>scalar</em>) – Default value in case <cite>date</cite> can’t be found.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Value corresponding to <cite>date</cite>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">scalar</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseries.TimeSeries.set_attribute">
+<code class="descname">set_attribute</code><span class="sig-paren">(</span><em>attribute_name</em>, <em>attribute_value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseries.html#TimeSeries.set_attribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseries.TimeSeries.set_attribute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets <code class="docutils literal notranslate"><span class="pre">self.ts_attributes[attribute_name]</span></code> to <cite>attribute_value</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>attribute_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the attribute to be set.</li>
+<li><strong>attribute_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><em>object</em></a>) – Value to set the attribute.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseries.TimeSeries.set_attributes">
+<code class="descname">set_attributes</code><span class="sig-paren">(</span><em>attribute_dict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseries.html#TimeSeries.set_attributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseries.TimeSeries.set_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets attributes of the TimeSeries according to data in <cite>attribute_dict</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>attribute_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – Attribute names (keys) and attribute values (values) to be set.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseries.TimeSeries.update_attributes">
+<code class="descname">update_attributes</code><span class="sig-paren">(</span><em>arg_attributes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseries.html#TimeSeries.update_attributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseries.TimeSeries.update_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates <cite>self.ts_attributes</cite> with data in <cite>arg_attributes</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>arg_attributes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – Attribute names (keys) and attribute values (values) to be set.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="tsio.timeseries.TimeSeries.update_values">
+<code class="descname">update_values</code><span class="sig-paren">(</span><em>arg_values</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/tsio/timeseries.html#TimeSeries.update_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tsio.timeseries.TimeSeries.update_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates <code class="docutils literal notranslate"><span class="pre">self.ts_values</span></code> with data in <cite>arg_values</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>arg_values</strong> (<em>pandas.Series</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – New dates and values.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2018, Lanx Capital & Vinícius Calasans.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/tsio/tsio.timeseries.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
