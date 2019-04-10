@@ -85,8 +85,8 @@ def isvectorizable(obj):
 
     """
     return hasattr(obj, '__iter__') and \
-           not isinstance(obj, (str, datetime, np.datetime64)) and \
-           not hasattr(obj, "dayOfMonth")  # In case of QuantLib date types.
+        not isinstance(obj, (str, datetime, np.datetime64)) and \
+        not hasattr(obj, "dayOfMonth")  # In case of QuantLib date types.
 
 
 def to_list(arg):
