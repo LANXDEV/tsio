@@ -354,8 +354,8 @@ class DBIO:
             for document in documents:
                 for key in document:  # Some fine tuning in encoding. e.g. MongoDB does not accept numpy.int64.
                     try:
-                        if np.issubdtype(document[key], int):
-                            document[key] = np.asscalar(document[key])
+                        if np.issubdtype(document[key], np.signedinteger):
+                            document[key] = document[key].item()
                     except:
                         pass
                 try:
@@ -420,8 +420,8 @@ class DBIO:
             for document in documents:
                 for key in document:  # Some fine tuning in encoding. e.g. MongoDB does not accept numpy.int64.
                     try:
-                        if np.issubdtype(document[key], int):
-                            document[key] = np.asscalar(document[key])
+                        if np.issubdtype(document[key], np.signedinteger):
+                            document[key] = document[key].item()
                     except:
                         pass
                     if pd.isnull(document[key]):
