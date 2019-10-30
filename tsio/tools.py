@@ -114,6 +114,42 @@ def to_list(arg):
         return [arg]
 
 
+def to_upper_list(arg):
+    """Convert a string or list of strings in upper-case list of strings.
+
+    Parameters
+    ----------
+    arg: str or list-like of str.
+
+    Returns
+    -------
+    list
+
+    """
+    if isinstance(arg, str):
+        return [arg.upper()]
+    else:
+        return [x.upper() for x in arg]
+
+
+def to_lower_list(arg):
+    """Convert a string or list of strings in lower-case list of strings.
+
+    Parameters
+    ----------
+    arg: str or list-like of str.
+
+    Returns
+    -------
+    list
+
+    """
+    if isinstance(arg, str):
+        return [arg.lower()]
+    else:
+        return [x.lower() for x in arg]
+
+
 def to_datetime(arg):
     """Converts a QuantLib.Date instance to datetime.datetime instance.
 
@@ -168,3 +204,32 @@ def at_index(df, index, last_available=True, fill_value=np.nan):
     if not isvectorizable(index):
         return result[0]
     return result
+
+
+def filter_series(df, initial_date=None, final_date=None):
+    """Filter (inplace) a Series/DataFrame DatetimeIndex to keep only dates that are between two dates.
+
+    Parameters
+    ----------
+    df: pandas.Series, pandas.DataFrame
+    initial_date: datetime.datetime, optional
+    final_date: datetime.datetime, optional
+
+    """
+
+    if initial_date is None and final_date is not None:
+        final_date = pd.to_datetime(final_date)
+        df.drop(df[(df.index > final_date)].index, inplace=True)
+    elif final_date is None and initial_date is not None:
+        initial_date = pd.to_datetime(initial_date)
+        df.drop(df[(df.index < initial_date)].index, inplace=True)
+    elif final_date is None and initial_date is None:
+        pass
+    elif initial_date == final_date:
+        initial_date = pd.to_datetime(initial_date)
+        df.drop(df[(df.index != initial_date)].index, inplace=True)
+    else:
+        initial_date = pd.to_datetime(initial_date)
+        final_date = pd.to_datetime(final_date)
+        df.drop(df[(df.index < initial_date) | (df.index > final_date)].index, inplace=True)
+
