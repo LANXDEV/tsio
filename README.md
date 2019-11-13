@@ -16,9 +16,9 @@ pip install git+https://github.com/LANXDEV/tsio/
 ```
 
 ## Dependencies
-- [NumPy](https://www.numpy.org): 1.14.2 or higher
-- [pandas](https://pandas.pydata.org/): 0.22.0 or higher
-- [PyMongo](https://api.mongodb.com/python/current/): 3.6.1 or higher
+- [NumPy](https://www.numpy.org): 1.17.0 or higher
+- [pandas](https://pandas.pydata.org/): 0.25.0 or higher
+- [PyMongo](https://api.mongodb.com/python/current/): 3.9.0 or higher
 
 
 ## Authors
