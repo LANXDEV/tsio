@@ -587,13 +587,13 @@ class DBIO:
         # available_dates = kwargs.pop("AVAILABLE_DATES", None)
         available_dates = kwargs.pop("AVAILABLE", None)
 
-        if 'FIELD' not in kwargs and not all_fields:
-            kwargs['FIELD'] = [None]
+        if FIELD not in kwargs and not all_fields:
+            kwargs[FIELD] = [None]
 
-        if mode.upper() in ('OR', 'OU'):
+        if mode.upper() in OR:
             filtered_collection = self.db.find({'$or': [{i: {'$in': list(v)}} for i, v in kwargs.items()]},
                                                {TS_NAME: 1})
-        elif mode.upper() in ('AND', 'E'):
+        elif mode.upper() in AND:
             filtered_collection = self.db.find({'$and': [{i: {'$in': list(v)}} for i, v in kwargs.items()]},
                                                {TS_NAME: 1})
         else:
