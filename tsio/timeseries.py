@@ -104,8 +104,8 @@ class TimeSeries:
 
     def __call__(self, *args, **kwargs):
         if args or kwargs:
-            return self.get_value(*args, **kwargs)
-        return self.quotes.ts_values
+            return self.get_values(*args, **kwargs)
+        return self.ts_values
 
     def __getattr__(self, attr):
         if attr == 'ts_values':
