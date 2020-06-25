@@ -24,7 +24,9 @@ import numpy as np
 import pandas as pd
 import pymongo
 from pymongo.errors import BulkWriteError
-from tsio.constants import COMPONENTS, TS_NAME, TS_VALUES, LAST_USE, RESERVED_KEYS, OR, AND, FIELD
+from tsio.constants import COMPONENTS, TS_NAME, TS_VALUES, LAST_USE, RESERVED_KEYS, OR_VALUES, \
+    AND_VALUES, FIELD
+from tsio.io.mongo_operators import AND, OR, SET, IN, ID
 from tsio.tools import to_list
 from tsio.timeseries import TimeSeries
 from tsio.timeseriescollection import TimeSeriesCollection
@@ -217,7 +219,7 @@ class DBIO:
             names_list = ts_collection.ts_names()
             if not names_list:
                 break
-            query_bulk_result = list(self.db.find({TS_NAME: {"$in": names_list}}, attr_specs))
+            query_bulk_result = list(self.db.find({TS_NAME: {IN: names_list}}, attr_specs))
             all_names_list += names_list
             temp_ts_collection = TimeSeriesCollection()
             counter += 1
@@ -225,14 +227,14 @@ class DBIO:
                 ts = ts_collection.get(result[TS_NAME])
                 if isinstance(ts, TimeSeries):
                     del result[TS_NAME]
-                    del result['_id']
+                    del result[ID]
                     ts.update_attributes(result)
                     if counter < depth:
                         instantiate_components(ts, components, temp_ts_collection)
 
         # Now updating LAST_USE attribute for the requested TimeSeries
-        self.db.update_many({TS_NAME: {"$in": all_names_list}},
-                            {'$set': {LAST_USE: datetime.datetime.utcnow()}})
+        self.db.update_many({TS_NAME: {IN: all_names_list}},
+                            {SET: {LAST_USE: datetime.datetime.utcnow()}})
 
     def read_values(self, ts_collection, components=True, depth=np.inf):
         """ Read time series values from the database.
@@ -258,7 +260,7 @@ class DBIO:
             names_list = ts_collection.ts_names()
             if not names_list:
                 break
-            query_bulk_result = list(self.db.find({TS_NAME: {"$in": names_list}}, {TS_NAME: 1, TS_VALUES: 1}))
+            query_bulk_result = list(self.db.find({TS_NAME: {IN: names_list}}, {TS_NAME: 1, TS_VALUES: 1}))
             all_names_list += names_list
             temp_ts_collection = TimeSeriesCollection()
             counter += 1
@@ -267,7 +269,7 @@ class DBIO:
                     ts = ts_collection.get(result[TS_NAME])
                     if isinstance(ts, TimeSeries):
                         new_values = pd.Series(result[TS_VALUES])
-                        new_values.index = pd.to_datetime(new_values.index.values, unit='ms', errors='coerce')
+                        new_values.index = pd.to_datetime(new_values.index, unit='ms', errors='coerce')
                         ts.update_values(new_values)
                         if counter < depth:
                             instantiate_components(ts, components, temp_ts_collection)
@@ -295,7 +297,7 @@ class DBIO:
             names_list = ts_collection.ts_names()
             if not names_list:
                 break
-            query_bulk_result = list(self.db.find({TS_NAME: {"$in": names_list}}))
+            query_bulk_result = list(self.db.find({TS_NAME: {IN: names_list}}))
             all_names_list += names_list
             temp_ts_collection = TimeSeriesCollection()
             counter += 1
@@ -305,18 +307,18 @@ class DBIO:
                 if isinstance(ts, TimeSeries):
                     new_values_dict[TS_VALUES] = result[TS_VALUES]
                     del result[TS_VALUES]
-                    del result['_id']
+                    del result[ID]
                     del result[TS_NAME]
                     ts.update_attributes(result)
                     new_values = pd.Series(new_values_dict[TS_VALUES])
-                    new_values.index = pd.to_datetime(new_values.index.values, unit='ms', errors='coerce')
+                    new_values.index = pd.to_datetime(new_values.index, unit='ms', errors='coerce')
                     ts.update_values(new_values)
                     if counter < depth:
                         instantiate_components(ts, components, temp_ts_collection)
 
         # Now updating LAST_USE attribute for the requested TimeSeries
-        self.db.update_many({TS_NAME: {"$in": all_names_list}},
-                            {'$set': {LAST_USE: datetime.datetime.utcnow()}})
+        self.db.update_many({TS_NAME: {IN: all_names_list}},
+                            {SET: {LAST_USE: datetime.datetime.utcnow()}})
 
     def write_attributes(self, ts_collection, components=True, depth=np.inf):
         """ Write time series attributes to the database.
@@ -364,7 +366,7 @@ class DBIO:
                 except:
                     pass
 
-                bulkop.find({TS_NAME: document[TS_NAME]}).upsert().update({'$set': document})
+                bulkop.find({TS_NAME: document[TS_NAME]}).upsert().update({SET: document})
 
             try:
                 return bulkop.execute()
@@ -426,7 +428,7 @@ class DBIO:
                         pass
                     if pd.isnull(document[key]):
                         document[key] = None
-                bulkop.find({TS_NAME: document[TS_NAME]}).upsert().update({'$set': document})
+                bulkop.find({TS_NAME: document[TS_NAME]}).upsert().update({SET: document})
 
             try:
                 retval = bulkop.execute()
@@ -480,7 +482,7 @@ class DBIO:
                 elif ans == 'y':
                     break
         if names_to_delete:
-            return list(self.db.remove({TS_NAME: {"$in": names_to_delete}}))
+            return list(self.db.remove({TS_NAME: {IN: names_to_delete}}))
 
     def attribute_names(self, ts_names=None):
         """ Return set of attribute names in the database.
@@ -501,7 +503,7 @@ class DBIO:
         if not ts_names:
             all_docs = self.db.find()
         else:
-            all_docs = self.db.find({TS_NAME: {"$in": ts_names}}, {TS_VALUES: 0})
+            all_docs = self.db.find({TS_NAME: {IN: ts_names}}, {TS_VALUES: 0})
 
         for doc in all_docs:
             all_attributes.update(doc.keys())
@@ -550,7 +552,7 @@ class DBIO:
         bool
             Whether there is a time series with the same name in the database.
         """
-        found_entry = self.db.find({TS_NAME: ts.ts_name}, {"_id": 1}).count()
+        found_entry = self.db.find({TS_NAME: ts.ts_name}, {ID: 1}).count()
         if found_entry > 0:
             return True
         else:
@@ -590,11 +592,11 @@ class DBIO:
         if FIELD not in kwargs and not all_fields:
             kwargs[FIELD] = [None]
 
-        if mode.upper() in OR:
-            filtered_collection = self.db.find({'$or': [{i: {'$in': list(v)}} for i, v in kwargs.items()]},
+        if mode.upper() in OR_VALUES:
+            filtered_collection = self.db.find({OR: [{i: {IN: list(v)}} for i, v in kwargs.items()]},
                                                {TS_NAME: 1})
-        elif mode.upper() in AND:
-            filtered_collection = self.db.find({'$and': [{i: {'$in': list(v)}} for i, v in kwargs.items()]},
+        elif mode.upper() in AND_VALUES:
+            filtered_collection = self.db.find({AND: [{i: {IN: list(v)}} for i, v in kwargs.items()]},
                                                {TS_NAME: 1})
         else:
             filtered_collection = self.db.find({}, {TS_NAME: 1})

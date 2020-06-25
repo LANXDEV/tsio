@@ -29,5 +29,5 @@ RESERVED_KEYS = ['TS_NAME', '_id']  # Keys that should not be kept when converti
 # TimeSeries.
 FIELD = 'FIELD'  # Optional attribute containing the field of a TimeSeries (e.g.: 'quote', 'call_schedule',
 # 'amount_outstanding'). This is only used in tsio.io.dbio.DBIO.select method.
-AND = ['AND', 'E']  # Represents the 'and' specification for the tsio.io.dbio.DBIO.select method.
-OR = ['OR', 'OU']  # Represents the 'or' specification for the tsio.io.dbio.DBIO.select method.
+AND_VALUES = ['AND', 'E']  # Represents the 'and' specification for the tsio.io.dbio.DBIO.select method.
+OR_VALUES = ['OR', 'OU']  # Represents the 'or' specification for the tsio.io.dbio.DBIO.select method.
