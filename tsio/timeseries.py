@@ -248,4 +248,11 @@ class TimeSeries:
             Value corresponding to `date`.
         """
         index = to_datetime(index)
-        return at_index(df=self.ts_values, index=index, last_available=last_available, fill_value=fill_value)
+        if not isinstance(index, list):
+            price = self.ts_values.get(index)
+            if price is None:
+                return at_index(df=self.ts_values, index=index, last_available=last_available, fill_value=fill_value)
+            else:
+                return price
+        else:
+            return at_index(df=self.ts_values, index=index, last_available=last_available, fill_value=fill_value)
