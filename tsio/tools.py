@@ -186,11 +186,14 @@ def to_datetime(arg):
             return pd.to_datetime(arg)
     else:
         # arg is not vectorizable.
-        try:
-            # Works if arg is a ql.Date object.
-            return datetime(day=arg.dayOfMonth(), month=arg.month(), year=arg.year())
-        except AttributeError:
-            return pd.to_datetime(arg)
+        if isinstance(arg, datetime):
+            return arg
+        else:
+            try:
+                # Works if arg is a ql.Date object.
+                return datetime(day=arg.dayOfMonth(), month=arg.month(), year=arg.year())
+            except AttributeError:
+                return pd.to_datetime(arg)
 
 
 def at_index(df, index, last_available=True, fill_value=np.nan):
